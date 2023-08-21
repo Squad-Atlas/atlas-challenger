@@ -1,10 +1,17 @@
-import * as express from "express"
-import { Request, Response } from "express"
+import mongoose from "mongoose"
+import app from "./app"
+import { config } from "@/config/config"
 
-const app = express()
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World!")
-})
-
-app.listen(3000, () => console.log("Listening on port 3000!"))
+// Connect To MongoDB
+mongoose
+  .connect(config.mongo.url, { retryWrites: true, w: "majority" })
+  .then(() => {
+    console.log("🎲 Connected to MongoDB Sucessfull!")
+    const port = config.server.port || 3000
+    app.listen(port, () => {
+      console.log(`👂 Server is listening on http://localhost:${port} `)
+    })
+  })
+  .catch((error) => {
+    console.log(error)
+  })
