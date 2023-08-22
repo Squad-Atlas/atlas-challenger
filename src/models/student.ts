@@ -20,7 +20,7 @@ const studentSchema = new Schema<Student>(
     instructor: { type: Schema.Types.ObjectId, ref: "Instructor" },
     areasOfInterest: [{ type: String }],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const StudentModel = mongoose.model<Student>("Student", studentSchema);

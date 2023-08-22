@@ -1,18 +1,21 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const { MONGO_URL } = process.env;
 
 if (!MONGO_URL) {
-  throw new Error('DB_URL not specified in the .env file');
+  throw new Error("DB_URL not specified in the .env file");
 }
 
-mongoose.connect(MONGO_URL).then(() => {
-  console.log('Connected to MongoDB');
-}).catch((err) => {
-  console.error('Connection error:', err);
-});
+mongoose
+  .connect(MONGO_URL)
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((err) => {
+    console.error("Connection error:", err);
+  });
 
 const db = mongoose.connection;
 

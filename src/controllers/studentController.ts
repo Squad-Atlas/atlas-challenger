@@ -23,13 +23,14 @@ export const createStudent = async (req: Request, res: Response) => {
 export const updateStudent = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const updatedStudent = await StudentModel.findByIdAndUpdate(id, req.body, { new: true });
+    const updatedStudent = await StudentModel.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
     res.status(200).json(updatedStudent);
   } catch (error) {
     res.status(400).json({ error: "Failed to update student" });
   }
 };
-
 
 export const deleteStudent = async (req: Request, res: Response) => {
   const { id } = req.params;

@@ -1,8 +1,8 @@
 import express from "express";
 
-import * as dotenv from "dotenv";
+import dotenv from "dotenv";
 import studentRoutes from "./routes/studentRoutes";
-import "./config/database"; 
+import "./config/database";
 
 dotenv.config();
 
