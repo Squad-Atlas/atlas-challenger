@@ -1,17 +1,18 @@
-import mongoose from "mongoose"
-import app from "./app"
-import { config } from "@/config/config"
+import express from "express";
 
-// Connect To MongoDB
-mongoose
-  .connect(config.mongo.url, { retryWrites: true, w: "majority" })
-  .then(() => {
-    console.log("🎲 Connected to MongoDB Sucessfull!")
-    const port = config.server.port || 3000
-    app.listen(port, () => {
-      console.log(`👂 Server is listening on http://localhost:${port} `)
-    })
-  })
-  .catch((error) => {
-    console.log(error)
-  })
+import * as dotenv from "dotenv";
+import studentRoutes from "./routes/studentRoutes";
+import "./config/database"; 
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.json());
+
+app.use("/", studentRoutes);
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
