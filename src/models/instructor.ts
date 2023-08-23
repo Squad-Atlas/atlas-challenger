@@ -8,18 +8,18 @@ interface Instructor extends Document {
   user: string;
   password: string;
   role: string;
-  specialties: string[];
+  specialty: string[];
 }
 
 const InstructorSchema = new Schema<Instructor>({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  students: [{ type: Schema.Types.ObjectId, ref: "Student", required: true }],
+  students: [{ type: Schema.Types.ObjectId, ref: "Student", default: [] }],
   phone: { type: String, required: true },
   user: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String },
-  specialties: [{ type: String }],
+  specialty: [{ type: String }],
 });
 
 const InstructorModel = mongoose.model<Instructor>(
