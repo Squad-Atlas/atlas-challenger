@@ -5,7 +5,6 @@ import { router as instructorRoutes } from "./routes/instructorRoutes";
 
 const app = express();
 
-
 app.use(express.json());
 app.use("/api/v1", studentRoutes);
 app.use("/api/v1", instructorRoutes);
