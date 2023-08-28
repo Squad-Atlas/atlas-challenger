@@ -1,6 +1,9 @@
 import jwt from "jsonwebtoken";
 import { Instructor } from "@/models/instructor";
-import { JWT_INSTRUCTOR_SECRET } from "@/config/jwt";
+import { config } from "@/config/config";
+
+const JWT_INSTRUCTOR_SECRET = config.jwt.secret;
+
 export const header = new Headers();
 
 export const createInstructorToken = (instructor: Instructor) => {

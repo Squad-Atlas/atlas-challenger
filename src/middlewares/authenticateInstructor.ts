@@ -1,7 +1,9 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import { header } from "@/utils/createInstructorToken";
-import { JWT_INSTRUCTOR_SECRET } from "@/config/jwt";
+import { config } from "@/config/config";
+
+const JWT_INSTRUCTOR_SECRET = config.jwt.secret;
 
 export const authenticateInstructor = (
   req: Request,
