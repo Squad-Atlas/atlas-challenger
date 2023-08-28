@@ -7,6 +7,7 @@ interface Student extends Document {
   user: string;
   password: string;
   instructor?: string;
+  role: string;
   areasOfInterest: string[];
 }
 
@@ -18,6 +19,7 @@ const studentSchema = new Schema<Student>(
     user: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     instructor: { type: Schema.Types.ObjectId, ref: "Instructor" },
+    role: { type: String, default: "user" },
     areasOfInterest: [{ type: String }],
   },
   { timestamps: true },
