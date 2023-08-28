@@ -5,7 +5,7 @@ import {
   createInstructor,
   updateInstructor,
   deleteInstructor,
-} from "../controllers/instructorController";
+} from "@/controllers/instructorController";
 import { authenticateInstructor } from "@/middlewares/authenticateInstructor";
 const router = express.Router();
 

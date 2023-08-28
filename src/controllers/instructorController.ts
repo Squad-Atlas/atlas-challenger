@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import InstructorModel from "../models/instructor";
+import InstructorModel from "@/models/instructor";
 import { createInstructorToken, header } from "@/utils/createInstructorToken";
 
 export const getInstructors = async (_req: Request, res: Response) => {

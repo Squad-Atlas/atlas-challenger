@@ -1,7 +1,7 @@
 import express from "express";
 import { Request, Response } from "express";
-import { router as studentRoutes } from "./routes/studentRoutes";
-import { router as instructorRoutes } from "./routes/instructorRoutes";
+import { router as studentRoutes } from "@/routes/studentRoutes";
+import { router as instructorRoutes } from "@/routes/instructorRoutes";
 
 const app = express();
 
