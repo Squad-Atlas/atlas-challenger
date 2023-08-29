@@ -20,14 +20,14 @@
  *                  example: "Diego@email.com"
  *              phone:
  *                  type: string
- *                  example: "4002-8922"
+ *                  example: "1140028922"
  *              user:
  *                  type: string
  *                  example: "Diego"
  *              password:
  *                  type: string
  *                  format: password
- *                  example: "password"
+ *                  example: "Password@123"
  *              areasOfInterest:
  *                  type: array
  *                  items:
@@ -48,13 +48,13 @@
  *                  example: "Diego@email.com"
  *              phone:
  *                  type: string
- *                  example: "4002-8922"
+ *                  example: "1140028922"
  *              user:
  *                  type: string
  *                  example: "Diego"
  *              password:
  *                  type: string
- *                  example: "password"
+ *                  example: "$2b$10$tsLZtUdyWwNRp9FdxVPNbO1PB5m2gHXGzWWBIxGtLKJnK8SPRIjTC"
  *              areasOfInterest:
  *                  type: array
  *                  items:
