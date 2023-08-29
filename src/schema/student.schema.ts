@@ -33,9 +33,6 @@
  *                  items:
  *                      type: string
  *                  example: ["Math", "Portuguese"]
- *              role:
- *                  type: string
- *                  default: "user"
  *
  *      StudentResponse:
  *          type: object
