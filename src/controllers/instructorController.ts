@@ -4,6 +4,7 @@ import { createInstructorToken, header } from "@/utils/createInstructorToken";
 import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 import mongoose from "mongoose";
 import "express-async-errors";
+import { validateFields } from "@/utils/validationUtils";
 
 /**
  * @swagger
@@ -94,23 +95,15 @@ export const getInstructors = async (_req: Request, res: Response) => {
  */
 
 export const createInstructor = async (req: Request, res: Response) => {
-  const { name, email, phone, user, password } = req.body;
+  const newInstructorData: Instructor = req.body;
 
-  if (!name || !email || !phone || !user || !password) {
-    throw new BadRequestError(
-      "Make sure that all fields have been filled out.",
-    );
+  const validationErrors = validateFields(newInstructorData);
+
+  if (validationErrors.msgErrors) {
+    throw new BadRequestError(validationErrors.msgErrors);
   }
 
-  const instructor = {
-    name,
-    email,
-    phone,
-    user,
-    password,
-  };
-
-  const newInstructor: Instructor = new InstructorModel(instructor);
+  const newInstructor: Instructor = new InstructorModel(newInstructorData);
   await newInstructor.save();
   createInstructorToken(newInstructor);
 
@@ -182,8 +175,15 @@ export const updateInstructor = async (req: Request, res: Response) => {
   if (!mongoose.isValidObjectId(id))
     throw new BadRequestError("Please provide a valid id.");
 
+  const newInstructorData: Instructor = req.body;
+  const validationErrors = validateFields(newInstructorData);
+
+  if (validationErrors.msgErrors) {
+    throw new BadRequestError(validationErrors.msgErrors);
+  }
+
   const updatedInstructor: Instructor | null =
-    await InstructorModel.findByIdAndUpdate(id, req.body, {
+    await InstructorModel.findByIdAndUpdate(id, newInstructorData, {
       new: true,
     });
 

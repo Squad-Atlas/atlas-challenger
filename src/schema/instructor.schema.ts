@@ -19,13 +19,13 @@
  *                  example: "Diego@email.com"
  *              phone:
  *                  type: string
- *                  example: "4002-8922"
+ *                  example: "1140028922"
  *              user:
  *                  type: string
  *                  example: "Diego"
  *              password:
  *                  type: string
- *                  example: "password"
+ *                  example: "Password@123"
  *              specialty:
  *                  type: array
  *                  items:
@@ -49,7 +49,7 @@
  *                  default: []
  *              phone:
  *                  type: string
- *                  example: "4002-8922"
+ *                  example: "1140028922"
  *              user:
  *                  type: string
  *                  example: "Diego"
