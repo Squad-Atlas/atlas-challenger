@@ -1,10 +1,11 @@
+import { Student } from "@/models/student";
 import { Instructor } from "../models/instructor";
 
 export interface ValidationErrors {
   msgErrors: string;
 }
 
-export function validateFields(data: Instructor): ValidationErrors {
+export function validateFields(data: Instructor | Student): ValidationErrors {
   const errors: ValidationErrors = { msgErrors: "" };
 
   if (!data.name || data.name.trim() === "") {
