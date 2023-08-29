@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import StudentModel, { Student } from "@/models/student";
 import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 import mongoose from "mongoose";
+import "express-async-errors";
+import { validateFields } from "@/utils/validationUtils";
 
 /**
  * @swagger
@@ -80,23 +82,15 @@ export const getStudents = async (_req: Request, res: Response) => {
  */
 
 export const createStudent = async (req: Request, res: Response) => {
-  const { name, email, phone, user, password } = req.body;
+  const newStudentData: Student = req.body;
 
-  if (!name || !email || !phone || !user || !password) {
-    throw new BadRequestError(
-      "Make sure that all fields have been filled out.",
-    );
+  const validationErrors = validateFields(newStudentData);
+
+  if (validationErrors.msgErrors) {
+    throw new BadRequestError(validationErrors.msgErrors);
   }
 
-  const student = {
-    name,
-    email,
-    phone,
-    user,
-    password,
-  };
-
-  const newStudent: Student = new StudentModel(student);
+  const newStudent: Student = new StudentModel(newStudentData);
   await newStudent.save();
   res.status(201).json(newStudent);
 };
@@ -165,9 +159,20 @@ export const updateStudent = async (req: Request, res: Response) => {
   if (!mongoose.isValidObjectId(id))
     throw new BadRequestError("Please provide a valid id");
 
-  const updatedStudent = await StudentModel.findByIdAndUpdate(id, req.body, {
-    new: true,
-  });
+  const newStudentData: Student = req.body;
+  const validationErrors = validateFields(newStudentData);
+
+  if (validationErrors.msgErrors) {
+    throw new BadRequestError(validationErrors.msgErrors);
+  }
+
+  const updatedStudent: Student | null = await StudentModel.findByIdAndUpdate(
+    id,
+    newStudentData,
+    {
+      new: true,
+    },
+  );
 
   if (!updatedStudent) throw new NotFoundError("Student not found!");
 
