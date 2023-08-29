@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
-import StudentModel from "@/models/student";
+import StudentModel, { Student } from "@/models/student";
+import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
+import mongoose from "mongoose";
 
 /**
  * @swagger
@@ -19,16 +21,20 @@ import StudentModel from "@/models/student";
  *              items:
  *                $ref: "#/components/schemas/StudentResponse"
  *      500:
- *        description: An error occurred
+ *        description: Internal Server Error
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Internal Server Error
  */
 
 export const getStudents = async (_req: Request, res: Response) => {
-  try {
-    const students = await StudentModel.find();
-    res.status(200).json(students);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch students" });
-  }
+  const students: Student[] = await StudentModel.find();
+  res.status(200).json(students);
 };
 
 /**
@@ -51,18 +57,48 @@ export const getStudents = async (_req: Request, res: Response) => {
  *          application/json:
  *            schema:
  *                $ref: "#/components/schemas/StudentResponse"
+ *      400:
+ *        description: Bad Request
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Make sure that all fields have been filled out.
  *      500:
- *        description: An error occurred
+ *        description: Internal Server Error
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Internal Server Error
  */
 
 export const createStudent = async (req: Request, res: Response) => {
-  try {
-    const newStudent = new StudentModel(req.body);
-    await newStudent.save();
-    res.status(201).json(newStudent);
-  } catch (error) {
-    res.status(400).json({ error: "Failed to create student" });
+  const { name, email, phone, user, password } = req.body;
+
+  if (!name || !email || !phone || !user || !password) {
+    throw new BadRequestError(
+      "Make sure that all fields have been filled out.",
+    );
   }
+
+  const student = {
+    name,
+    email,
+    phone,
+    user,
+    password,
+  };
+
+  const newStudent: Student = new StudentModel(student);
+  await newStudent.save();
+  res.status(201).json(newStudent);
 };
 
 /**
@@ -90,19 +126,52 @@ export const createStudent = async (req: Request, res: Response) => {
  *          application/json:
  *            schema:
  *              $ref: "#/components/schemas/StudentResponse"
+ *      400:
+ *        description: Bad Request
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Please provide a valid id.
+ *      404:
+ *        description: Not found
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  default: Student not found
+ *      500:
+ *        description: Internal Server Error
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Internal Server Error
  *
  */
 
 export const updateStudent = async (req: Request, res: Response) => {
   const { id } = req.params;
-  try {
-    const updatedStudent = await StudentModel.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
-    res.status(200).json(updatedStudent);
-  } catch (error) {
-    res.status(400).json({ error: "Failed to update student" });
-  }
+
+  if (!mongoose.isValidObjectId(id))
+    throw new BadRequestError("Please provide a valid id");
+
+  const updatedStudent = await StudentModel.findByIdAndUpdate(id, req.body, {
+    new: true,
+  });
+
+  if (!updatedStudent) throw new NotFoundError("Student not found!");
+
+  res.status(200).json(updatedStudent);
 };
 
 /**
@@ -129,8 +198,18 @@ export const updateStudent = async (req: Request, res: Response) => {
  *                message:
  *                  type: string
  *                  default: Student deleted successfully
+ *      400:
+ *        description: Bad Request
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Please provide a valid id.
  *      404:
- *        description: Student not found
+ *        description: Not found
  *        content:
  *          application/json:
  *            schema:
@@ -140,26 +219,26 @@ export const updateStudent = async (req: Request, res: Response) => {
  *                  type: string
  *                  default: Student not found
  *      500:
- *        description: Failed to delete student
+ *        description: Internal Server Error
  *        content:
  *          application/json:
  *            schema:
  *              type: object
  *              properties:
- *                error:
+ *                message:
  *                  type: string
- *                  default: Failed to delete student
+ *                  default: Internal Server Error
  */
 
 export const deleteStudent = async (req: Request, res: Response) => {
   const { id } = req.params;
-  try {
-    const deletedStudent = await StudentModel.findByIdAndDelete(id);
-    if (!deletedStudent) {
-      return res.status(404).json({ error: "Student not found" });
-    }
-    res.status(200).json({ message: "Student deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to delete student" });
-  }
+
+  if (!mongoose.isValidObjectId(id))
+    throw new BadRequestError("Please provide a valid id");
+
+  const deletedStudent = await StudentModel.findByIdAndDelete(id);
+
+  if (!deletedStudent) throw new NotFoundError("Student not found!");
+
+  res.status(200).json({ message: "Student deleted successfully" });
 };

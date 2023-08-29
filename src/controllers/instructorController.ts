@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
-import InstructorModel from "@/models/instructor";
+import InstructorModel, { Instructor } from "@/models/instructor";
 import { createInstructorToken, header } from "@/utils/createInstructorToken";
+import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
+import mongoose from "mongoose";
+import "express-async-errors";
 
 /**
  * @swagger
@@ -19,17 +22,31 @@ import { createInstructorToken, header } from "@/utils/createInstructorToken";
  *              type: array
  *              items:
  *                $ref: "#/components/schemas/InstructorResponse"
+ *      401:
+ *        description: Unauthorized
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Invalid token
  *      500:
- *        description: An error occurred
+ *        description: Internal Server Error
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Internal Server Error
  */
 
 export const getInstructors = async (_req: Request, res: Response) => {
-  try {
-    const instructors = await InstructorModel.find();
-    res.status(200).json(instructors);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch instructors" });
-  }
+  const instructors: Instructor[] = await InstructorModel.find();
+  res.status(200).json(instructors);
 };
 
 /**
@@ -53,20 +70,51 @@ export const getInstructors = async (_req: Request, res: Response) => {
  *          application/json:
  *            schema:
  *                $ref: "#/components/schemas/InstructorResponse"
- *
+ *      400:
+ *        description: Bad Request
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Make sure that all fields have been filled out.
+ *      500:
+ *        description: Internal Server Error
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Internal Server Error
  *
  */
 
 export const createInstructor = async (req: Request, res: Response) => {
-  try {
-    const newInstructor = new InstructorModel(req.body);
-    await newInstructor.save();
-    createInstructorToken(newInstructor);
-    res.status(201).json(newInstructor);
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ error: "Failed to create instructor" });
+  const { name, email, phone, user, password } = req.body;
+
+  if (!name || !email || !phone || !user || !password) {
+    throw new BadRequestError(
+      "Make sure that all fields have been filled out.",
+    );
   }
+
+  const instructor = {
+    name,
+    email,
+    phone,
+    user,
+    password,
+  };
+
+  const newInstructor: Instructor = new InstructorModel(instructor);
+  await newInstructor.save();
+  createInstructorToken(newInstructor);
+
+  res.status(201).json(newInstructor);
 };
 
 /**
@@ -95,33 +143,53 @@ export const createInstructor = async (req: Request, res: Response) => {
  *          application/json:
  *            schema:
  *              $ref: "#/components/schemas/InstructorResponse"
- *      404:
- *        description: Instructor not found
+ *      400:
+ *        description: Bad Request
  *        content:
  *          application/json:
  *            schema:
  *              type: object
  *              properties:
- *                error:
+ *                message:
+ *                  type: string
+ *                  default: Please provide a valid id.
+ *      404:
+ *        description: Not found
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
  *                  type: string
  *                  default: Instructor not found
+ *      500:
+ *        description: Internal Server Error
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Internal Server Error
  *
  */
 
 export const updateInstructor = async (req: Request, res: Response) => {
   const { id } = req.params;
-  try {
-    const updatedInstructor = await InstructorModel.findByIdAndUpdate(
-      id,
-      req.body,
-      {
-        new: true,
-      },
-    );
-    res.status(200).json(updatedInstructor);
-  } catch (error) {
-    res.status(400).json({ error: "Failed to update instructor" });
-  }
+
+  if (!mongoose.isValidObjectId(id))
+    throw new BadRequestError("Please provide a valid id.");
+
+  const updatedInstructor: Instructor | null =
+    await InstructorModel.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+
+  if (!updatedInstructor) throw new NotFoundError("Instructor not found!");
+
+  res.status(200).json(updatedInstructor);
 };
 
 /**
@@ -148,8 +216,18 @@ export const updateInstructor = async (req: Request, res: Response) => {
  *                message:
  *                  type: string
  *                  default: Instructor deleted successfully
+ *      400:
+ *        description: Bad Request
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Please provide a valid id.
  *      404:
- *        description: Instructor not found
+ *        description: Not found
  *        content:
  *          application/json:
  *            schema:
@@ -159,27 +237,27 @@ export const updateInstructor = async (req: Request, res: Response) => {
  *                  type: string
  *                  default: Instructor not found
  *      500:
- *        description: Failed to delete instructor
+ *        description: Internal Server Error
  *        content:
  *          application/json:
  *            schema:
  *              type: object
  *              properties:
- *                error:
+ *                message:
  *                  type: string
- *                  default: Failed to delete instructor
+ *                  default: Internal Server Error
  */
 
 export const deleteInstructor = async (req: Request, res: Response) => {
   const { id } = req.params;
-  try {
-    const deletedInstructor = await InstructorModel.findByIdAndDelete(id);
-    if (!deletedInstructor) {
-      return res.status(404).json({ error: "Instructor not found" });
-    }
-    header.delete("token");
-    res.status(200).json({ message: "Instructor deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to delete instructor" });
-  }
+
+  if (!mongoose.isValidObjectId(id))
+    throw new BadRequestError("Please provide a valid id");
+
+  const deletedInstructor = await InstructorModel.findByIdAndDelete(id);
+
+  if (!deletedInstructor) throw new NotFoundError("Instructor not found!");
+
+  header.delete("token");
+  res.status(200).json({ message: "Instructor deleted successfully" });
 };
