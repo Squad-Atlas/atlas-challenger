@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
+import bcrypt from "bcrypt";
 
 export interface Instructor extends Document {
   name: string;
@@ -24,6 +25,19 @@ const InstructorSchema = new Schema<Instructor>(
   },
   { timestamps: true },
 );
+
+InstructorSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
+
+InstructorSchema.methods.comparePassword = async function (
+  reqPassword: string,
+) {
+  const isMatch = await bcrypt.compare(reqPassword, this.password);
+  return isMatch;
+};
 
 const InstructorModel = mongoose.model<Instructor>(
   "Instructor",
