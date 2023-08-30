@@ -17,11 +17,15 @@ export const authentication = async (
   res: Response,
   next: NextFunction,
 ) => {
+  let token: string;
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  } else if (req.signedCookies.token) {
+    token = req.signedCookies.token;
+  } else {
     throw new UnauthorizedError("Invalid token");
   }
-  const token: string = authHeader.split(" ")[1];
 
   const decoded = isTokenValid(token) as jwt.JwtPayload;
   const { _id, user, role } = decoded;
