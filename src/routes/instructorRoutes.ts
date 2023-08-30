@@ -6,12 +6,27 @@ import {
   updateInstructor,
   deleteInstructor,
 } from "@/controllers/instructorController";
-import { authenticateInstructor } from "@/middlewares/authenticateInstructor";
+import { authentication, authorizeRoles } from "@/middlewares/authentication";
 const router = express.Router();
 
 router.post("/instructors", createInstructor);
-router.put("/instructors/:id", updateInstructor);
-router.get("/instructors", authenticateInstructor, getInstructors);
-router.delete("/instructors/:id", deleteInstructor);
+router.put(
+  "/instructors",
+  authentication,
+  authorizeRoles("instructor"),
+  updateInstructor,
+);
+router.get(
+  "/instructors",
+  authentication,
+  authorizeRoles("student", "instructor"),
+  getInstructors,
+);
+router.delete(
+  "/instructors",
+  authentication,
+  authorizeRoles("instructor"),
+  deleteInstructor,
+);
 
 export { router };

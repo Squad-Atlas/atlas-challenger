@@ -8,8 +8,13 @@ export interface ValidationErrors {
 export function validateFields(data: Instructor | Student): ValidationErrors {
   const errors: ValidationErrors = { msgErrors: "" };
 
-  if (!data.name || data.name.trim() === "") {
-    const error: string = "[The name is required.] ";
+  if (
+    !data.name ||
+    !/^[A-Za-z\s]+$/.test(data.name) ||
+    data.name.length < 3 ||
+    data.name.length > 50
+  ) {
+    const error: string = `[The name must contain only letters and spaces, and be between ${3} and ${50} characters.] `;
     errors.msgErrors = errors.msgErrors.concat(error);
   }
 
@@ -19,7 +24,7 @@ export function validateFields(data: Instructor | Student): ValidationErrors {
     errors.msgErrors = errors.msgErrors.concat(error);
   }
 
-  if (!data.phone || data.phone.length < 10) {
+  if (!data.phone || !/^\d{10}$/.test(data.phone)) {
     const error: string = "[The phone is invalid.] ";
     errors.msgErrors = errors.msgErrors.concat(error);
   }

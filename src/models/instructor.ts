@@ -2,6 +2,7 @@ import mongoose, { Document, Schema, Types } from "mongoose";
 import bcrypt from "bcrypt";
 
 export interface Instructor extends Document {
+  _id: string;
   name: string;
   email: string;
   students: Types.ObjectId[];
@@ -10,6 +11,8 @@ export interface Instructor extends Document {
   password: string;
   role: string;
   specialty: string[];
+
+  comparePassword(): boolean;
 }
 
 const InstructorSchema = new Schema<Instructor>(
@@ -20,14 +23,13 @@ const InstructorSchema = new Schema<Instructor>(
     phone: { type: String, required: true },
     user: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, default: "admin" },
+    role: { type: String, default: "instructor" },
     specialty: [{ type: String }],
   },
   { timestamps: true },
 );
 
 InstructorSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
