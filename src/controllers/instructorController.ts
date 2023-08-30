@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import InstructorModel, { Instructor } from "@/models/instructor";
-import { createInstructorToken, header } from "@/utils/createInstructorToken";
 import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 import mongoose from "mongoose";
 import "express-async-errors";
 import { validateFields } from "@/utils/validationUtils";
+import { Payload } from "@/middlewares/authentication";
 
 /**
  * @swagger
@@ -103,9 +103,8 @@ export const createInstructor = async (req: Request, res: Response) => {
     throw new BadRequestError(validationErrors.msgErrors);
   }
 
-  const newInstructor: Instructor = new InstructorModel(newInstructorData);
+  const newInstructor = new InstructorModel(newInstructorData);
   await newInstructor.save();
-  createInstructorToken(newInstructor);
 
   res.status(201).json(newInstructor);
 };
@@ -170,9 +169,9 @@ export const createInstructor = async (req: Request, res: Response) => {
  */
 
 export const updateInstructor = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { _id } = (req as Payload).user;
 
-  if (!mongoose.isValidObjectId(id))
+  if (!mongoose.isValidObjectId(_id))
     throw new BadRequestError("Please provide a valid id.");
 
   const newInstructorData: Instructor = req.body;
@@ -183,11 +182,16 @@ export const updateInstructor = async (req: Request, res: Response) => {
   }
 
   const updatedInstructor: Instructor | null =
-    await InstructorModel.findByIdAndUpdate(id, newInstructorData, {
+    await InstructorModel.findByIdAndUpdate(_id, newInstructorData, {
       new: true,
     });
 
   if (!updatedInstructor) throw new NotFoundError("Instructor not found!");
+
+  if (newInstructorData.password) {
+    updatedInstructor.password = newInstructorData.password;
+    await updatedInstructor.save();
+  }
 
   res.status(200).json(updatedInstructor);
 };
@@ -249,15 +253,14 @@ export const updateInstructor = async (req: Request, res: Response) => {
  */
 
 export const deleteInstructor = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { _id } = (req as Payload).user;
 
-  if (!mongoose.isValidObjectId(id))
+  if (!mongoose.isValidObjectId(_id))
     throw new BadRequestError("Please provide a valid id");
 
-  const deletedInstructor = await InstructorModel.findByIdAndDelete(id);
+  const deletedInstructor = await InstructorModel.findByIdAndDelete(_id);
 
   if (!deletedInstructor) throw new NotFoundError("Instructor not found!");
 
-  header.delete("token");
   res.status(200).json({ message: "Instructor deleted successfully" });
 };

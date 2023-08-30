@@ -4,6 +4,7 @@ import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 import mongoose from "mongoose";
 import "express-async-errors";
 import { validateFields } from "@/utils/validationUtils";
+import { Payload } from "@/middlewares/authentication";
 
 /**
  * @swagger
@@ -154,9 +155,9 @@ export const createStudent = async (req: Request, res: Response) => {
  */
 
 export const updateStudent = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { _id } = (req as Payload).user;
 
-  if (!mongoose.isValidObjectId(id))
+  if (!mongoose.isValidObjectId(_id))
     throw new BadRequestError("Please provide a valid id");
 
   const newStudentData: Student = req.body;
@@ -167,7 +168,7 @@ export const updateStudent = async (req: Request, res: Response) => {
   }
 
   const updatedStudent: Student | null = await StudentModel.findByIdAndUpdate(
-    id,
+    _id,
     newStudentData,
     {
       new: true,
@@ -175,6 +176,11 @@ export const updateStudent = async (req: Request, res: Response) => {
   );
 
   if (!updatedStudent) throw new NotFoundError("Student not found!");
+
+  if (newStudentData.password) {
+    updatedStudent.password = newStudentData.password;
+    await updatedStudent.save();
+  }
 
   res.status(200).json(updatedStudent);
 };
@@ -236,12 +242,12 @@ export const updateStudent = async (req: Request, res: Response) => {
  */
 
 export const deleteStudent = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { _id } = (req as Payload).user;
 
-  if (!mongoose.isValidObjectId(id))
+  if (!mongoose.isValidObjectId(_id))
     throw new BadRequestError("Please provide a valid id");
 
-  const deletedStudent = await StudentModel.findByIdAndDelete(id);
+  const deletedStudent = await StudentModel.findByIdAndDelete(_id);
 
   if (!deletedStudent) throw new NotFoundError("Student not found!");
 
