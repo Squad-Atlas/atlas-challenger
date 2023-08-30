@@ -10,6 +10,9 @@ import { Payload } from "@/middlewares/authentication";
  * @swagger
  * /instructors:
  *  get:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Instructor
  *    summary: Get all instructors
@@ -103,7 +106,7 @@ export const createInstructor = async (req: Request, res: Response) => {
     throw new BadRequestError(validationErrors.msgErrors);
   }
 
-  const newInstructor = new InstructorModel(newInstructorData);
+  const newInstructor: Instructor = new InstructorModel(newInstructorData);
   await newInstructor.save();
 
   res.status(201).json(newInstructor);
@@ -111,17 +114,15 @@ export const createInstructor = async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /instructors/{id}:
+ * /instructors:
  *  put:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Instructor
  *    summary: Update a Instructor
  *    description: Update an instructor by id
- *    parameters:
- *      - name: id
- *        in: path
- *        description: The id of the instructor
- *        requuired: true
  *    requestBody:
  *      required: true
  *      content:
@@ -198,17 +199,15 @@ export const updateInstructor = async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /instructors/{id}:
+ * /instructors:
  *  delete:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Instructor
  *    summary: Delete a Instructor
  *    description: Delete an instructor by id
- *    parameters:
- *      - name: id
- *        in: path
- *        description: The id of the instructor
- *        requuired: true
  *    responses:
  *      200:
  *        description: Success delete instructor

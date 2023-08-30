@@ -16,13 +16,13 @@ const options: swaggerJSDoc.Options = {
           scheme: "bearer",
           bearerFormat: "JWT",
         },
+        cookieAuth: {
+          type: "apiKey",
+          in: "cookie",
+          name: "token",
+        },
       },
     },
-    security: [
-      {
-        bearerAuth: [],
-      },
-    ],
     servers: [
       {
         url: "http://localhost:3000/api/v1",

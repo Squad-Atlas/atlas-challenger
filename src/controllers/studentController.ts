@@ -10,6 +10,9 @@ import { Payload } from "@/middlewares/authentication";
  * @swagger
  * /students:
  *  get:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Student
  *    summary: Get all students
@@ -98,17 +101,15 @@ export const createStudent = async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /students/{id}:
+ * /students:
  *  put:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Student
  *    summary: Update a student
  *    description: Update an student by id
- *    parameters:
- *      - name: id
- *        in: path
- *        description: The id of the student
- *        requuired: true
  *    requestBody:
  *      content:
  *        application/json:
@@ -187,17 +188,15 @@ export const updateStudent = async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /students/{id}:
+ * /students:
  *  delete:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Student
  *    summary: Delete a student
  *    description: Delete an student by id
- *    parameters:
- *      - name: id
- *        in: path
- *        description: The id of the student
- *        requuired: true
  *    responses:
  *      200:
  *        description: Success delete student
