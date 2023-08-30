@@ -1,11 +1,10 @@
-import app from "@/app";
-import { config } from "@/config/config";
-import "./database/database";
-import swaggerDocs from "@/config/swagger";
+import * as express from "express"
+import { Request, Response } from "express"
 
-const PORT = config.server.port;
+const app = express()
 
-app.listen(PORT, () => {
-  console.log(`👂 Server is listening on http://localhost:${PORT} `);
-  swaggerDocs(app, PORT);
-});
+app.get("/", (req: Request, res: Response) => {
+  res.send("Hello World!")
+})
+
+app.listen(3000, () => console.log("Listening on port 3000!"))
