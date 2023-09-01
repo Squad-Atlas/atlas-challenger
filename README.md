@@ -26,7 +26,7 @@
 # Challenge #01 - Node - API Classroom
 
 ## Description
-The Synchronous Online Classes API is an innovative platform where subject-matter expert teachers conduct real-time classes for students, who can enroll in multiple subjects. This approach offers specialized knowledge, flexibility of choice, and interactivity, fostering dynamic and collaborative virtual classrooms. Features like class recordings, assessments, and personalized feedback ensure an enriching learning experience, all with a focus on user security and privacy.
+This api serves to a platform which is focused on mentorship through synchronous online classes. The mentors being specialized in a subject, only being able to minister this subject, and the mentoree can enroll in as many as possible classes. This approach offers specialized knowledge, flexibility of choice, and interactivity, fostering dynamic and collaborative virtual classrooms. Features like class recordings, assessments, and personalized feedback ensure an enriching learning experience
 
 ## Tech Stack
 
