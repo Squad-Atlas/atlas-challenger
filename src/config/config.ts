@@ -4,9 +4,9 @@ dotenv.config();
 
 const MONGO_URL = process.env.MONGO_URL || "";
 const PORT = process.env.PORT || 3000;
-const JWT_INSTRUCTOR_SECRET = process.env.JWT_INSTRUCTOR_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET;
 
-if (!JWT_INSTRUCTOR_SECRET) {
+if (!JWT_SECRET) {
   throw new Error(
     "The (secret) key JWT_INSTRUCTOR_SECRET not specified in the .env file",
   );
@@ -24,6 +24,6 @@ export const config = {
     port: PORT,
   },
   jwt: {
-    secret: JWT_INSTRUCTOR_SECRET,
+    secret: JWT_SECRET,
   },
 };

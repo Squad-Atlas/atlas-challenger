@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post("/instructors", createInstructor);
 router.put(
-  "/instructors",
+  "/instructors/:id",
   authentication,
   authorizeRoles("instructor"),
   updateInstructor,
@@ -23,7 +23,7 @@ router.get(
   getInstructors,
 );
 router.delete(
-  "/instructors",
+  "/instructors/:id",
   authentication,
   authorizeRoles("instructor"),
   deleteInstructor,

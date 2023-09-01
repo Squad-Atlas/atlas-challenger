@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.post("/students", createStudent);
 router.put(
-  "/students",
+  "/students/:id",
   authentication,
   authorizeRoles("student"),
   updateStudent,
@@ -22,7 +22,7 @@ router.get(
   getStudents,
 );
 router.delete(
-  "/students",
+  "/students/:id",
   authentication,
   authorizeRoles("student"),
   deleteStudent,
