@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcrypt";
+import { Classroom } from "./classroom";
 
 export interface Student extends Document {
   _id: string;
@@ -8,37 +9,37 @@ export interface Student extends Document {
   phone: string;
   user: string;
   password: string;
-  instructor?: string;
   role: string;
-  areasOfInterest: string[];
+  classroom: Classroom[];
 
   comparePassword(reqPassword: string): boolean;
 }
 
-const studentSchema = new Schema<Student>(
+const StudentSchema = new Schema<Student>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     phone: { type: String, required: true },
     user: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    instructor: { type: Schema.Types.ObjectId, ref: "Instructor" },
     role: { type: String, default: "student" },
-    areasOfInterest: [{ type: String }],
+    classroom: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Classroom", unique: true },
+    ],
   },
   { timestamps: true },
 );
 
-studentSchema.pre("save", async function () {
+StudentSchema.pre("save", async function () {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-studentSchema.methods.comparePassword = async function (reqPassword: string) {
+StudentSchema.methods.comparePassword = async function (reqPassword: string) {
   const isMatch = await bcrypt.compare(reqPassword, this.password);
   return isMatch;
 };
 
-const StudentModel = mongoose.model<Student>("Student", studentSchema);
+const StudentModel = mongoose.model<Student>("Student", StudentSchema);
 
 export default StudentModel;
