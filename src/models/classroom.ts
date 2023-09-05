@@ -32,6 +32,7 @@ const ClassroomSchema = new Schema<Classroom>(
     },
     schedule: [
       {
+        _id: false,
         day: { type: String },
         startTime: { type: String },
         endTime: { type: String },
@@ -42,6 +43,7 @@ const ClassroomSchema = new Schema<Classroom>(
     ],
     documents: [
       {
+        _id: false,
         authorId: { type: String },
         path: { type: String },
         default: [],
