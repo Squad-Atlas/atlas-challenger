@@ -2,18 +2,25 @@ import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 import ClassroomModel, { Classroom } from "@/models/classroom";
 import InstructorModel, { Instructor } from "@/models/instructor";
 import StudentModel, { Student } from "@/models/student";
+import { conflictTime, IconflictTime } from "@/utils/hours";
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 
 export const listSubjects = async (req: Request, res: Response) => {
   const listSubjects: Classroom[] = await ClassroomModel.find()
-    .populate({ path: "instructor", select: "name -_id" })
+    .populate({ path: "instructor", select: "name" })
     .select("subject schedule -_id");
   return res.status(200).json(listSubjects);
 };
 
 export const enrollSubject = async (req: Request, res: Response) => {
   const { studentId, instructorId } = req.params;
+  const { day, startTime, endTime } = req.query as {
+    day: string;
+    startTime: string;
+    endTime: string;
+  };
+
   if (
     !mongoose.isValidObjectId(instructorId) ||
     !mongoose.isValidObjectId(studentId)
@@ -22,15 +29,7 @@ export const enrollSubject = async (req: Request, res: Response) => {
 
   const student: Student | null = await StudentModel.findById(studentId)
     .select("classroom")
-    .populate({
-      path: "classroom",
-      model: "Classroom",
-      select: "schedule",
-      populate: {
-        path: "schedule",
-        model: "Schedule",
-      },
-    });
+    .populate("classroom");
 
   if (!student) {
     throw new NotFoundError("Student not found!");
@@ -56,12 +55,16 @@ export const enrollSubject = async (req: Request, res: Response) => {
 
   const classroomId = instructor.classroom._id;
 
-  if (student.classroom) {
-    console.log("Aluno tem aula!");
-    console.log(student.classroom);
-    //console.log(student.classroom.schedule);
-    console.log(instructor.classroom.schedule);
+  const classroom: Classroom | null = await ClassroomModel.findById(
+    classroomId,
+  );
+
+  if (!classroom) {
+    throw new NotFoundError("Classroom not found!");
   }
+  const ownClassDay = student.classroom.find((el) =>
+    el.schedule.some((schedule) => schedule.day === day),
+  );
 
   const index = instructor.classroom.students.findIndex((aluno) => {
     return aluno.id.trim() === student.id.trim();
@@ -71,7 +74,24 @@ export const enrollSubject = async (req: Request, res: Response) => {
     throw new BadRequestError("You are already subscribed to this teacher");
   }
 
-  // Implementar aqui calendário
+  if (ownClassDay) {
+    const times: IconflictTime[] = [];
+    for (const classroom of student.classroom) {
+      for (const schedule of classroom.schedule) {
+        // Pegar horario somente do dia da aula
+        times.push({
+          startTime: schedule.startTime,
+          endTime: schedule.endTime,
+        });
+      }
+    }
+
+    if (conflictTime(startTime, endTime, times)) {
+      throw new BadRequestError(
+        "Unfortunately this class is in conflict with another class!",
+      );
+    }
+  }
 
   if (instructor.classroom.students.length < 30) {
     const classroom = await ClassroomModel.findByIdAndUpdate(classroomId, {

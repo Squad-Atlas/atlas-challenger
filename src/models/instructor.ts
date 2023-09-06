@@ -26,7 +26,6 @@ const InstructorSchema = new Schema<Instructor>(
     classroom: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Classroom",
-      unique: true,
     },
   },
   { timestamps: true },
