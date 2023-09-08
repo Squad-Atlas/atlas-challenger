@@ -9,7 +9,7 @@ import {
 import {
   listSubjects,
   enrollSubject,
-  // unsubscribeInstructor,
+  unrollSubject,
 } from "@/controllers/studentsControllers/studentsFunctionalities";
 
 import { authentication, authorizeRoles } from "@/middlewares/authentication";
@@ -47,17 +47,17 @@ router.get(
 );
 
 router.post(
-  "/students/enrollSubject/:studentId/:instructorId",
+  "/students/enrollSubject/:studentId/:classRoomId",
   authentication,
   authorizeRoles("student"),
   enrollSubject,
 );
 
-// router.post(
-//   "/students/unsubscribeInstructor/:id",
-//   authentication,
-//   authorizeRoles("student"),
-//   unsubscribeInstructor,
-// );
+router.post(
+  "/students/unrollSubject/:studentId/:classRoomId",
+  authentication,
+  authorizeRoles("student"),
+  unrollSubject,
+);
 
 export { router };

@@ -1,6 +1,5 @@
 import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 import ClassroomModel, { Classroom } from "@/models/classroom";
-import InstructorModel, { Instructor } from "@/models/instructor";
 import StudentModel, { Student } from "@/models/student";
 import { conflictTime, IconflictTime } from "@/utils/hours";
 import { Request, Response } from "express";
@@ -9,12 +8,12 @@ import mongoose from "mongoose";
 export const listSubjects = async (req: Request, res: Response) => {
   const listSubjects: Classroom[] = await ClassroomModel.find()
     .populate({ path: "instructor", select: "name" })
-    .select("subject schedule -_id");
+    .select("subject schedule");
   return res.status(200).json(listSubjects);
 };
 
 export const enrollSubject = async (req: Request, res: Response) => {
-  const { studentId, instructorId } = req.params;
+  const { studentId, classRoomId } = req.params;
   const { day, startTime, endTime } = req.query as {
     day: string;
     startTime: string;
@@ -22,7 +21,7 @@ export const enrollSubject = async (req: Request, res: Response) => {
   };
 
   if (
-    !mongoose.isValidObjectId(instructorId) ||
+    !mongoose.isValidObjectId(classRoomId) ||
     !mongoose.isValidObjectId(studentId)
   )
     throw new BadRequestError("Please provide a valid id.");
@@ -35,42 +34,19 @@ export const enrollSubject = async (req: Request, res: Response) => {
     throw new NotFoundError("Student not found!");
   }
 
-  const instructor: Instructor | null = await InstructorModel.findById(
-    instructorId,
-  )
-    .select("classroom")
-    .populate({
-      path: "classroom",
-      model: "Classroom",
-      select: "students",
-      populate: {
-        path: "students",
-        model: "Student",
-      },
-    });
-
-  if (!instructor) {
-    throw new NotFoundError("Instructor not found!");
-  }
-
-  const classroomId = instructor.classroom._id;
-
   const classroom: Classroom | null = await ClassroomModel.findById(
-    classroomId,
+    classRoomId,
   );
 
   if (!classroom) {
     throw new NotFoundError("Classroom not found!");
   }
+
   const ownClassDay = student.classroom.find((el) =>
     el.schedule.some((schedule) => schedule.day === day),
   );
 
-  const index = instructor.classroom.students.findIndex((aluno) => {
-    return aluno.id.trim() === student.id.trim();
-  });
-
-  if (index !== -1) {
+  if (classroom.students.includes(student.id)) {
     throw new BadRequestError("You are already subscribed to this teacher");
   }
 
@@ -78,11 +54,12 @@ export const enrollSubject = async (req: Request, res: Response) => {
     const times: IconflictTime[] = [];
     for (const classroom of student.classroom) {
       for (const schedule of classroom.schedule) {
-        // Pegar horario somente do dia da aula
-        times.push({
-          startTime: schedule.startTime,
-          endTime: schedule.endTime,
-        });
+        if (schedule.day === day) {
+          times.push({
+            startTime: schedule.startTime,
+            endTime: schedule.endTime,
+          });
+        }
       }
     }
 
@@ -93,8 +70,8 @@ export const enrollSubject = async (req: Request, res: Response) => {
     }
   }
 
-  if (instructor.classroom.students.length < 30) {
-    const classroom = await ClassroomModel.findByIdAndUpdate(classroomId, {
+  if (classroom.students.length < 30) {
+    await ClassroomModel.findByIdAndUpdate(classRoomId, {
       $push: { students: student },
     });
 
@@ -111,35 +88,40 @@ export const enrollSubject = async (req: Request, res: Response) => {
   );
 };
 
-// export const unsubscribeInstructor = async (req: Request, res: Response) => {
-//   const instructorId = req.params.id;
-//   const studentId = (req as Payload).user._id;
+export const unrollSubject = async (req: Request, res: Response) => {
+  const { studentId, classRoomId } = req.params;
 
-//   if (!mongoose.isValidObjectId(instructorId))
-//     throw new BadRequestError("Please provide a valid id.");
+  if (
+    !mongoose.isValidObjectId(studentId) ||
+    !mongoose.isValidObjectId(classRoomId)
+  )
+    throw new BadRequestError("Please provide a valid id.");
 
-//   const student: Student | null = await StudentModel.findById(studentId);
+  const classroom: Classroom | null = await ClassroomModel.findById(
+    classRoomId,
+  );
 
-//   if (!student) {
-//     throw new NotFoundError("Student not found!");
-//   }
+  if (!classroom) {
+    throw new NotFoundError("Student not found!");
+  }
 
-//   const instructor: Instructor | null = await InstructorModel.findById(
-//     instructorId,
-//   );
+  const student: Student | null = await StudentModel.findById(studentId);
 
-//   if (!instructor) {
-//     throw new NotFoundError("Instructor not found!");
-//   }
-//   const objectStudentId = new mongoose.Types.ObjectId(student._id);
+  if (!student) {
+    throw new NotFoundError("Student not found!");
+  }
 
-//   if (!instructor.students.includes(objectStudentId)) {
-//     throw new BadRequestError("You are not subscribed to this teacher");
-//   }
+  if (!student.classroom.includes(classroom._id)) {
+    throw new NotFoundError("You are not enrolled in this class!");
+  }
 
-//   await InstructorModel.findByIdAndUpdate(instructorId, {
-//     $pull: { students: student._id },
-//   });
+  await ClassroomModel.findByIdAndUpdate(classRoomId, {
+    $pull: { students: student._id },
+  });
 
-//   return res.status(200).json({ message: "You canceled your subscription" });
-// };
+  await StudentModel.findByIdAndUpdate(studentId, {
+    $pull: { classroom: classroom._id },
+  });
+
+  return res.status(200).json({ message: "You canceled your subscription" });
+};
