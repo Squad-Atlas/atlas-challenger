@@ -1,7 +1,6 @@
 import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 import ClassroomModel, { Classroom } from "@/models/classroom";
 import InstructorModel, { Instructor } from "@/models/instructor";
-//import { Student } from "@/models/student";
 import { Request, Response } from "express";
 
 export const listStudents = async (req: Request, res: Response) => {
