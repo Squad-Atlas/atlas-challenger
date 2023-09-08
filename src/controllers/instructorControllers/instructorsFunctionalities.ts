@@ -30,8 +30,6 @@ export const listStudents = async (req: Request, res: Response) => {
     throw new NotFoundError("You don't have any subject registered!");
   }
 
-  // const results = instructor.classroom.students;
-
   res.status(200).json({ Students: instructor.classroom.students });
 };
 
