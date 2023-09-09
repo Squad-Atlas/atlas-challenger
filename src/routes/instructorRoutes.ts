@@ -10,6 +10,7 @@ import {
 import {
   listStudents,
   registerClass,
+  unsubscribeStudent,
 } from "@/controllers/instructorControllers/instructorsFunctionalities";
 
 import { authentication, authorizeRoles } from "@/middlewares/authentication";
@@ -51,6 +52,13 @@ router.post(
   authentication,
   authorizeRoles("instructor"),
   registerClass,
+);
+
+router.delete(
+  "/instructors/unsubscribeStudent/:instructorId/:studentId",
+  authentication,
+  authorizeRoles("instructor"),
+  unsubscribeStudent,
 );
 
 export { router };
