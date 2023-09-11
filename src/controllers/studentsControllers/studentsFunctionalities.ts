@@ -2,6 +2,7 @@ import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 import ClassroomModel, { Classroom } from "@/models/classroom";
 import StudentModel, { Student } from "@/models/student";
 import { conflictTime, IconflictTime } from "@/utils/hours";
+import { sendMailSubscription } from "@/utils/sendEmail";
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 
@@ -36,7 +37,7 @@ export const enrollSubject = async (req: Request, res: Response) => {
 
   const classroom: Classroom | null = await ClassroomModel.findById(
     classRoomId,
-  );
+  ).populate("instructor");
 
   if (!classroom) {
     throw new NotFoundError("Classroom not found!");
@@ -75,9 +76,13 @@ export const enrollSubject = async (req: Request, res: Response) => {
       $push: { students: student },
     });
 
-    await StudentModel.findByIdAndUpdate(studentId, {
+    const studentUser = await StudentModel.findByIdAndUpdate(studentId, {
       $push: { classroom: classroom },
     });
+
+    if (!studentUser) throw new NotFoundError("Student not found!");
+
+    sendMailSubscription(studentUser, classroom, day, startTime, endTime);
 
     return res
       .status(200)
