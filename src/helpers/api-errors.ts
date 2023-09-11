@@ -25,3 +25,9 @@ export class NotFoundError extends ApiError {
     super(message, 404);
   }
 }
+
+export class InternalServerError extends ApiError {
+  constructor(message: string) {
+    super(message, 500);
+  }
+}

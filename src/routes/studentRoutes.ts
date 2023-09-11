@@ -10,6 +10,7 @@ import {
   listSubjects,
   enrollSubject,
   unrollSubject,
+  studentUploadFile,
 } from "@/controllers/studentsControllers/studentsFunctionalities";
 
 import { authentication, authorizeRoles } from "@/middlewares/authentication";
@@ -58,6 +59,13 @@ router.post(
   authentication,
   authorizeRoles("student"),
   unrollSubject,
+);
+
+router.post(
+  "/students/uploadAssignment/:studentId/:classRoomId",
+  authentication,
+  authorizeRoles("student"),
+  studentUploadFile,
 );
 
 export { router };
