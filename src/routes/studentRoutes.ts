@@ -47,7 +47,7 @@ router.post(
   enrollSubject,
 );
 
-router.post(
+router.patch(
   "/students/unrollSubject/:studentId/:classRoomId",
   authentication,
   authorizeRoles("student"),
