@@ -41,13 +41,12 @@ export async function sendMailSubscription(
     </body>
     </html>`;
 
-    const info = await transporter.sendMail({
+    await transporter.sendMail({
       from: "AtlasSchool@example.com",
       to: student.email,
       subject: classroom.subject,
       html: htmlContent,
     });
-    console.log("Message sent: %s", info.messageId);
   } catch (error) {
     console.log(error);
   }
