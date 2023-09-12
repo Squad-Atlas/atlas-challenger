@@ -10,6 +10,7 @@ import { StudentFileModel } from "@/models/studentsFile";
 import { Request, Response } from "express";
 import { UploadedFile } from "express-fileupload";
 import mongoose from "mongoose";
+import path from "path";
 
 export const listSubjects = async (req: Request, res: Response) => {
   const listSubjects: Classroom[] = await ClassroomModel.find()
@@ -136,6 +137,12 @@ export const studentUploadFile = async (req: Request, res: Response) => {
   const { studentId, classRoomId } = req.params;
   const file = req.files!.studentFile as UploadedFile;
 
+  if (file.size > 1024 * 1024 * 3) {
+    throw new BadRequestError(
+      "File size too big, provide a file with size less or equal than 3MB.",
+    );
+  }
+
   if (
     !mongoose.isValidObjectId(classRoomId) ||
     !mongoose.isValidObjectId(studentId)
@@ -171,7 +178,10 @@ export const studentUploadFile = async (req: Request, res: Response) => {
       "Please, try uploading a valid file type (pdf, docx, txt).",
     );
   }
-  file.mv(`../../temp/${file.name}`, (err: Error) => {
+
+  const filePath = path.join(__dirname, "../../../temp/" + `${file.name}`);
+
+  file.mv(filePath, (err: Error) => {
     if (err) {
       throw new InternalServerError(`Failed to move file: ${err.message}`);
     }
@@ -180,7 +190,6 @@ export const studentUploadFile = async (req: Request, res: Response) => {
     authorId: studentId,
     fileName: file.name,
     filePath: `../../temp/${file.name}`,
-    fileObject: file,
   });
 
   await File.save();
