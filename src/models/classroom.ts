@@ -39,11 +39,8 @@ const ClassroomSchema = new Schema<Classroom>(
     ],
     documents: [
       {
-        _id: false,
-        authorId: { type: String },
-        fileName: { type: String },
-        filePath: { type: String },
-        fileObject: { type: Object },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "File",
         default: [],
       },
     ],

@@ -134,7 +134,7 @@ export const unrollSubject = async (req: Request, res: Response) => {
 
 export const studentUploadFile = async (req: Request, res: Response) => {
   const { studentId, classRoomId } = req.params;
-  const txt = req.files!.studentFile as UploadedFile;
+  const file = req.files!.studentFile as UploadedFile;
 
   if (
     !mongoose.isValidObjectId(classRoomId) ||
@@ -156,32 +156,38 @@ export const studentUploadFile = async (req: Request, res: Response) => {
     throw new NotFoundError("Classroom not found!");
   }
 
-  if (!txt) {
+  if (!file) {
     throw new BadRequestError(
       "Something went wrong when uploading file. No file posted to be uploaded.",
     );
   }
 
   if (
-    !txt.name.endsWith("pdf") ||
-    !txt.name.endsWith("docx") ||
-    !txt.name.endsWith("txt")
+    !file.name.endsWith("pdf") &&
+    !file.name.endsWith("docx") &&
+    !file.name.endsWith("txt")
   ) {
-    throw new BadRequestError("Please, try uploading a valid file type");
+    throw new BadRequestError(
+      "Please, try uploading a valid file type (pdf, docx, txt).",
+    );
   }
-  txt.mv(`../../temp/${txt.name}`, (err) => {
+  file.mv(`../../temp/${file.name}`, (err: Error) => {
     if (err) {
-      throw new InternalServerError(`Failed to move file: ${err}`);
+      throw new InternalServerError(`Failed to move file: ${err.message}`);
     }
-    res.status(200).json({ message: "Success! File uploaded" });
   });
   const File = new StudentFileModel({
     authorId: studentId,
-    fileName: txt.name,
-    filePath: `../../temp/${txt.name}`,
-    fileObject: txt,
+    fileName: file.name,
+    filePath: `../../temp/${file.name}`,
+    fileObject: file,
   });
+
+  await File.save();
+
   await ClassroomModel.findByIdAndUpdate(classRoomId, {
     $push: { documents: File },
   });
+
+  res.status(200).json({ message: "Success! File uploaded" });
 };

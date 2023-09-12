@@ -12,7 +12,6 @@ const FileSchema = new Schema<StudentsFiles>(
     authorId: { type: String, required: true },
     fileName: { type: String },
     filePath: { type: String, required: true },
-    fileObject: { type: Object, required: true },
   },
   { timestamps: true },
 );
