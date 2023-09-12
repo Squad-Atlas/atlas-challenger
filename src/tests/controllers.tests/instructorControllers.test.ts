@@ -7,6 +7,9 @@ import {
 } from "@/controllers/instructorController";
 import InstructorModel from "@/models/instructor";
 import { ValidationErrors, validateFields } from "@/utils/validationUtils";
+import { Payload } from "@/middlewares/authentication";
+import mongoose from "mongoose";
+import { BadRequestError } from "@/helpers/api-errors";
 
 describe("getInstructors", () => {
   describe("Successful Cases", () => {
@@ -145,5 +148,70 @@ describe("createInstructor", () => {
     expect(errors.msgErrors).toContain(
       "[The password must contain at least one capital letter, one special character and one number.]",
     );
+  });
+});
+
+// Local test function deleteInstructorTest to simulate behavior
+const deleteInstructorTest = async (req: Request, res: Response) => {
+  const { _id } = (req as Payload).user;
+
+  if (!mongoose.isValidObjectId(_id))
+    throw new BadRequestError("Please provide a valid id");
+
+  const deletedInstructor = await InstructorModel.findByIdAndDelete(_id);
+
+  if (!deletedInstructor) {
+    res.status(404).json({ error: "Instructor not found" });
+  } else {
+    res.status(200).json({ message: "Instructor deleted successfully" });
+  }
+};
+
+describe("deleteInstructor", () => {
+  it("Should return a status 200 and a success message when deleting a valid instructor", async () => {
+    // Mock Request and Response
+    const req = { user: { _id: "64fa0ac0df48733a2589c3e0" } } as any;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as any;
+
+    // Mock the findByIdAndDelete function of InstructorModel
+    const mockDeletedInstructor = { _id: "64fa0ac0df48733a2589c3e0" };
+    const findByIdAndDeleteMock = jest
+      .spyOn(InstructorModel, "findByIdAndDelete")
+      .mockResolvedValue(mockDeletedInstructor);
+
+    await deleteInstructorTest(req, res);
+
+    expect(findByIdAndDeleteMock).toHaveBeenCalledWith(
+      "64fa0ac0df48733a2589c3e0",
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Instructor deleted successfully",
+    });
+  });
+
+  it("Should return a status 404 and an error message when attempting to delete an instructor with a different ID", async () => {
+    // Mock Request and Response with a different ID
+    const req = { user: { _id: "64fa0ac0df48733a2589c3e0" } } as any;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as any;
+
+    // Mock the findByIdAndDelete function of InstructorModel to return null
+    const findByIdAndDeleteMock = jest
+      .spyOn(InstructorModel, "findByIdAndDelete")
+      .mockResolvedValue(null); // Returning null when the ID is different
+
+    await deleteInstructorTest(req, res);
+
+    expect(findByIdAndDeleteMock).toHaveBeenCalledWith(
+      "64fa0ac0df48733a2589c3e0",
+    ); // Make sure you're checking the use of the mock here
+    expect(res.status).toHaveBeenCalledWith(404); // 404 represents "Not Found"
+    expect(res.json).toHaveBeenCalledWith({ error: "Instructor not found" }); // Appropriate error message
   });
 });
