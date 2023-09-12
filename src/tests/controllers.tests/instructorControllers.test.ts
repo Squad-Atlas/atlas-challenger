@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
-import { getInstructors } from "@/controllers/instructorController";
+import {
+  createInstructor,
+  getInstructors,
+} from "@/controllers/instructorController";
 import InstructorModel from "@/models/instructor";
+import { ValidationErrors, validateFields } from "@/utils/validationUtils";
 
 describe("getInstructors", () => {
   describe("Successful Cases", () => {
@@ -77,5 +81,69 @@ describe("getInstructors", () => {
         expect(error.message).toBe("Database error");
       }
     });
+  });
+});
+
+describe("createInstructor", () => {
+  it("should create a new instructor", async () => {
+    // Create a mocked instructor object to simulate the new instructor to be created.
+    const mockInstructor = {
+      name: "Teste Um",
+      email: "testeum@example.com",
+      phone: "1234567890",
+      user: "Teste1",
+      password: "!Abc123",
+      role: "instructor",
+    };
+
+    // Create a mock InstructorModel save function to simulate creating the instructor.
+    const saveMock = jest.fn().mockResolvedValue(mockInstructor);
+    jest.spyOn(InstructorModel.prototype, "save").mockImplementation(saveMock);
+
+    // Create mocks for Request and Response with the new instructor's data.
+    const req = {
+      body: mockInstructor,
+    } as unknown as Request;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as Response;
+
+    await createInstructor(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: mockInstructor.email,
+        name: mockInstructor.name,
+        password: mockInstructor.password,
+        phone: mockInstructor.phone,
+        role: mockInstructor.role,
+      }),
+    );
+  });
+
+  it("should return error messages for invalid instructor data", () => {
+    const invalidInstructorData: any = {
+      name: "Invalid Name123",
+      email: "invalidemail",
+      phone: "12345-67890",
+      user: "est",
+      password: "password",
+      role: "instructor",
+    };
+
+    const errors: ValidationErrors = validateFields(invalidInstructorData);
+
+    expect(errors.msgErrors).toContain(
+      "[The name must contain only letters and spaces, and be between 3 and 50 characters.]",
+    );
+    expect(errors.msgErrors).toContain("[The e-mail is invalid.]");
+    expect(errors.msgErrors).toContain("[The phone is invalid.]");
+    expect(errors.msgErrors).toContain("[The username is invalid.]");
+    expect(errors.msgErrors).toContain(
+      "[The password must contain at least one capital letter, one special character and one number.]",
+    );
   });
 });
