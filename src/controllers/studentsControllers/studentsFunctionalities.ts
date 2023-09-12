@@ -179,6 +179,22 @@ export const studentUploadFile = async (req: Request, res: Response) => {
     );
   }
 
+  const actualTime = `${new Date().getHours().toString()}-${new Date()
+    .getMinutes()
+    .toString()}-${new Date().getSeconds().toString()}`;
+
+  let extension;
+
+  if (file.name.endsWith("docx")) {
+    extension = file.name.slice(-5);
+  } else {
+    extension = file.name.slice(-4);
+  }
+
+  const newFileName = `${file.name.slice(0, -4)}-${actualTime}${extension}`;
+
+  file.name = newFileName;
+
   const filePath = path.join(__dirname, "../../../temp/" + `${file.name}`);
 
   file.mv(filePath, (err: Error) => {
