@@ -30,16 +30,6 @@ import mongoose from "mongoose";
  *                  type: array
  *                  items:
  *                    $ref: "#/components/schemas/ListStudents"
- *      400:
- *        description: Bad Request
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                message:
- *                  type: string
- *                  default: You don't have any subject registered!
  *      404:
  *        description: Not Found
  *        content:
