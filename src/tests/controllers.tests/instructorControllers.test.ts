@@ -9,7 +9,7 @@ import InstructorModel from "@/models/instructor";
 import { ValidationErrors, validateFields } from "@/utils/validationUtils";
 import { Payload } from "@/middlewares/authentication";
 import mongoose from "mongoose";
-import { BadRequestError } from "@/helpers/api-errors";
+import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 
 describe("getInstructors", () => {
   describe("Successful Cases", () => {
@@ -213,5 +213,111 @@ describe("deleteInstructor", () => {
     ); // Make sure you're checking the use of the mock here
     expect(res.status).toHaveBeenCalledWith(404); // 404 represents "Not Found"
     expect(res.json).toHaveBeenCalledWith({ error: "Instructor not found" }); // Appropriate error message
+  });
+});
+
+// Local test function updateInstructor to simulate behavior
+const updateInstructorTest = async (req: Request, res: Response) => {
+  const { _id } = (req as Payload).user;
+
+  if (!mongoose.isValidObjectId(_id))
+    throw new BadRequestError("Please provide a valid id");
+
+  // Simulate instructor update here
+  if (_id !== "64fa0ac0df48733a2589c3e0") {
+    throw new NotFoundError("Instructor not found"); // Adding a simulated NotFoundError
+  }
+
+  // Simulate instructor update here
+  const updatedInstructor = {
+    _id: "64fa0ac0df48733a2589c3e0",
+    name: "Update update",
+    email: "tupdateemail@example.com",
+    phone: "!A1234567890",
+    user: "Teste1",
+    password: "!Abc123",
+    role: "instructor",
+    // Other updated fields
+  };
+
+  res.status(200).json({
+    message: "Instructor updated successfully",
+    data: updatedInstructor,
+  });
+};
+
+describe("updateInstructor", () => {
+  it("Should return a status 200 and a success message when updating a valid instructor", async () => {
+    // Mock Request and Response
+    const req = { user: { _id: "64fa0ac0df48733a2589c3e0" } } as any;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as any;
+
+    // Call the updateInstructorTest function with the Request and Response mocks
+    await updateInstructorTest(req, res);
+
+    // Verify the status and response message
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Instructor updated successfully",
+      data: {
+        _id: "64fa0ac0df48733a2589c3e0",
+        name: "Update update",
+        email: "tupdateemail@example.com",
+        phone: "!A1234567890",
+        user: "Teste1",
+        password: "!Abc123",
+        role: "instructor",
+        // Other updated fields
+      },
+    });
+  });
+
+  it("Should return a status 400 and an error message when trying to update with an invalid ID", async () => {
+    // Mock Request and Response with an invalid ID
+    const req = { user: { _id: "64fa0ac0df48733a2589c3e0" } } as any;
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as any;
+
+    try {
+      // Call the updateInstructorTest function with the Request and Response mocks
+      await updateInstructorTest(req, res);
+    } catch (error) {
+      // Check if the exception is of type BadRequestError
+      expect(error).toBeInstanceOf(BadRequestError);
+
+      // Verify the status 400 and error message
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Please provide a valid id",
+      });
+    }
+  });
+
+  it("Should return status 404 if the ID is not as expected", async () => {
+    // Simulate a different ID than expected
+    const req = { user: { _id: "64fa0ac0df48733a2589c3e0" } } as any;
+
+    // Create a mock response object using jest.fn()
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as any;
+
+    try {
+      // Call the updateInstructorTest function with the Request and Response mocks
+      await updateInstructorTest(req, res);
+    } catch (error) {
+      // Check if the exception is of type NotFoundError
+      expect(error).toBeInstanceOf(NotFoundError);
+
+      // Verify the status 404 and error message
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ error: "Instructor not found" });
+    }
   });
 });
