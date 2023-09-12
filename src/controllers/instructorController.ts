@@ -4,54 +4,6 @@ import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 import mongoose from "mongoose";
 import "express-async-errors";
 import { validateFields } from "@/utils/validationUtils";
-import { Payload } from "@/middlewares/authentication";
-
-/**
- * @swagger
- * /instructors:
- *  get:
- *    security:
- *      - cookieAuth: []
- *      - bearerAuth: []
- *    tags:
- *      - Instructor
- *    summary: Get all instructors
- *    description: Returns a list of all instructors
- *    responses:
- *      200:
- *        description: A list of instructors
- *        content:
- *          application/json:
- *            schema:
- *              type: array
- *              items:
- *                $ref: "#/components/schemas/InstructorResponse"
- *      401:
- *        description: Unauthorized
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                message:
- *                  type: string
- *                  default: Invalid token
- *      500:
- *        description: Internal Server Error
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                message:
- *                  type: string
- *                  default: Internal Server Error
- */
-
-export const getInstructors = async (_req: Request, res: Response) => {
-  const instructors: Instructor[] = await InstructorModel.find();
-  res.status(200).json(instructors);
-};
 
 /**
  * @swagger
@@ -114,7 +66,7 @@ export const createInstructor = async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /instructors:
+ * /instructors/{id}:
  *  put:
  *    security:
  *      - cookieAuth: []
@@ -123,6 +75,11 @@ export const createInstructor = async (req: Request, res: Response) => {
  *      - Instructor
  *    summary: Update a Instructor
  *    description: Update an instructor by id
+ *    parameters:
+ *      - name: id
+ *        in: path
+ *        description: The id of the instructor
+ *        required: true
  *    requestBody:
  *      required: true
  *      content:
@@ -170,9 +127,9 @@ export const createInstructor = async (req: Request, res: Response) => {
  */
 
 export const updateInstructor = async (req: Request, res: Response) => {
-  const { _id } = (req as Payload).user;
+  const { id } = req.params;
 
-  if (!mongoose.isValidObjectId(_id))
+  if (!mongoose.isValidObjectId(id))
     throw new BadRequestError("Please provide a valid id.");
 
   const newInstructorData: Instructor = req.body;
@@ -183,7 +140,7 @@ export const updateInstructor = async (req: Request, res: Response) => {
   }
 
   const updatedInstructor: Instructor | null =
-    await InstructorModel.findByIdAndUpdate(_id, newInstructorData, {
+    await InstructorModel.findByIdAndUpdate(id, newInstructorData, {
       new: true,
     });
 
@@ -199,7 +156,7 @@ export const updateInstructor = async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /instructors:
+ * /instructors/{id}:
  *  delete:
  *    security:
  *      - cookieAuth: []
@@ -208,6 +165,11 @@ export const updateInstructor = async (req: Request, res: Response) => {
  *      - Instructor
  *    summary: Delete a Instructor
  *    description: Delete an instructor by id
+ *    parameters:
+ *      - name: id
+ *        in: path
+ *        description: The id of the instructor
+ *        requuired: true
  *    responses:
  *      200:
  *        description: Success delete instructor
@@ -252,12 +214,12 @@ export const updateInstructor = async (req: Request, res: Response) => {
  */
 
 export const deleteInstructor = async (req: Request, res: Response) => {
-  const { _id } = (req as Payload).user;
+  const { id } = req.params;
 
-  if (!mongoose.isValidObjectId(_id))
+  if (!mongoose.isValidObjectId(id))
     throw new BadRequestError("Please provide a valid id");
 
-  const deletedInstructor = await InstructorModel.findByIdAndDelete(_id);
+  const deletedInstructor = await InstructorModel.findByIdAndDelete(id);
 
   if (!deletedInstructor) throw new NotFoundError("Instructor not found!");
 

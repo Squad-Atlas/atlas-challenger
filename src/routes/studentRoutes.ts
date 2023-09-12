@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  getStudents,
   createStudent,
   updateStudent,
   deleteStudent,
@@ -24,12 +23,7 @@ router.put(
   authorizeRoles("student"),
   updateStudent,
 );
-router.get(
-  "/students",
-  authentication,
-  authorizeRoles("student", "instructor"),
-  getStudents,
-);
+
 router.delete(
   "/students",
   authentication,
