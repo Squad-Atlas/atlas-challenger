@@ -137,12 +137,6 @@ export const studentUploadFile = async (req: Request, res: Response) => {
   const { studentId, classRoomId } = req.params;
   const file = req.files!.studentFile as UploadedFile;
 
-  if (file.size > 1024 * 1024 * 3) {
-    throw new BadRequestError(
-      "File size too big, provide a file with size less or equal than 3MB.",
-    );
-  }
-
   if (
     !mongoose.isValidObjectId(classRoomId) ||
     !mongoose.isValidObjectId(studentId)
@@ -166,6 +160,12 @@ export const studentUploadFile = async (req: Request, res: Response) => {
   if (!file) {
     throw new BadRequestError(
       "Something went wrong when uploading file. No file posted to be uploaded.",
+    );
+  }
+
+  if (file.size > 1024 * 1024 * 3) {
+    throw new BadRequestError(
+      "File size too big, provide a file with size less or equal than 3MB.",
     );
   }
 
