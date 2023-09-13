@@ -379,7 +379,15 @@ export const unrollSubject = async (req: Request, res: Response) => {
 
 export const studentUploadFile = async (req: Request, res: Response) => {
   const { studentId, classRoomId } = req.params;
-  const file = req.files!.studentFile as UploadedFile;
+  let file = undefined;
+
+  if (req.files) {
+    file = req.files.studentFile as UploadedFile;
+  } else {
+    throw new BadRequestError(
+      "Something went wrong when uploading file. No file posted to be uploaded.",
+    );
+  }
 
   if (
     !mongoose.isValidObjectId(classRoomId) ||
@@ -399,12 +407,6 @@ export const studentUploadFile = async (req: Request, res: Response) => {
 
   if (!classroom) {
     throw new NotFoundError("Classroom not found!");
-  }
-
-  if (!file) {
-    throw new BadRequestError(
-      "Something went wrong when uploading file. No file posted to be uploaded.",
-    );
   }
 
   if (file.size > 1024 * 1024 * 3) {
