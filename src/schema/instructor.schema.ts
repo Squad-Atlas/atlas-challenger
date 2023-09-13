@@ -75,4 +75,30 @@
  *              __v:
  *                  type: integer
  *                  example: 0
+ *
+ *      InstructorClass:
+ *          type: object
+ *          required:
+ *              - subject
+ *              - schedule
+ *              - linkClassroom
+ *          properties:
+ *              subject:
+ *                  type: string
+ *                  example: "Math"
+ *              schedule:
+ *                  type: object
+ *                  properties:
+ *                      day:
+ *                          type: string
+ *                          example: "Monday"
+ *                      startTime:
+ *                          type: string
+ *                          example: "09:30:00"
+ *                      endTime:
+ *                          type: string
+ *                          example: "10:20:00"
+ *              linkClassroom:
+ *                  type: string
+ *                  example: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
  */

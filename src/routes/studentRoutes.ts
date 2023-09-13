@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  getStudents,
   createStudent,
   updateStudent,
   deleteStudent,
@@ -25,12 +24,7 @@ router.put(
   authorizeRoles("student"),
   updateStudent,
 );
-router.get(
-  "/students",
-  authentication,
-  authorizeRoles("student", "instructor"),
-  getStudents,
-);
+
 router.delete(
   "/students/:id",
   authentication,
@@ -54,7 +48,7 @@ router.post(
   enrollSubject,
 );
 
-router.post(
+router.patch(
   "/students/unrollSubject/:studentId/:classRoomId",
   authentication,
   authorizeRoles("student"),
