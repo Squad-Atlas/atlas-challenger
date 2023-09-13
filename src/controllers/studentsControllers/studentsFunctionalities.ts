@@ -1,86 +1,204 @@
-import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
+import {
+  BadRequestError,
+  InternalServerError,
+  NotFoundError,
+} from "@/helpers/api-errors";
 import ClassroomModel, { Classroom } from "@/models/classroom";
-import InstructorModel, { Instructor } from "@/models/instructor";
 import StudentModel, { Student } from "@/models/student";
+import { conflictTime, IconflictTime } from "@/utils/hours";
+import { sendMailSubscription } from "@/utils/sendEmail";
+import { StudentFileModel } from "@/models/studentsFile";
 import { Request, Response } from "express";
+import { UploadedFile } from "express-fileupload";
 import mongoose from "mongoose";
+import path from "path";
+
+/**
+ * @swagger
+ * /students/listSubjects:
+ *  get:
+ *    tags:
+ *      - Student
+ *    summary: List classes
+ *    description: Returns a list of registered classes
+ *    responses:
+ *      200:
+ *        description: List of classes documents
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                $ref: "#/components/schemas/ListSubjects"
+ *      500:
+ *        description: Internal Server Error
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Internal Server Error
+ *
+ */
 
 export const listSubjects = async (req: Request, res: Response) => {
   const listSubjects: Classroom[] = await ClassroomModel.find()
-    .populate({ path: "instructor", select: "name -_id" })
-    .select("subject schedule -_id");
+    .populate({ path: "instructor", select: "name" })
+    .select("subject schedule");
   return res.status(200).json(listSubjects);
 };
 
+/**
+ * @swagger
+ * /students/enrollSubject/{studentId}/{classRoomId}:
+ *  post:
+ *    tags:
+ *      - Student
+ *    summary: Sign up for a class
+ *    description: Registering for a class, if successful, an e-mail will be sent to the student with information about the class.
+ *    parameters:
+ *      - name: studentId
+ *        in: path
+ *        description: The id of the student
+ *        required: true
+ *      - name: classRoomId
+ *        in: path
+ *        description: The id of the classroom
+ *        required: true
+ *      - name: day
+ *        in: query
+ *        schema:
+ *          type: string
+ *          example: "Monday"
+ *        description: Class day
+ *      - name: startTime
+ *        in: query
+ *        schema:
+ *          type: string
+ *          example: "09:30"
+ *        description: Class start time
+ *      - name: endTime
+ *        in: query
+ *        schema:
+ *          type: string
+ *          example: "10:20"
+ *        description: Class ending time
+ *    responses:
+ *      200:
+ *        description: Ok
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Congratulations on the inscription
+ *      400:
+ *        description: Bad Request
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Please provide a valid id.
+ *      404:
+ *        description: Not Found
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Student not found!
+ *      500:
+ *        description: Internal Server Error
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Internal Server Error
+ *
+ */
+
 export const enrollSubject = async (req: Request, res: Response) => {
-  const { studentId, instructorId } = req.params;
+  const { studentId, classRoomId } = req.params;
+  const { day, startTime, endTime } = req.query as {
+    day: string;
+    startTime: string;
+    endTime: string;
+  };
+
   if (
-    !mongoose.isValidObjectId(instructorId) ||
+    !mongoose.isValidObjectId(classRoomId) ||
     !mongoose.isValidObjectId(studentId)
   )
     throw new BadRequestError("Please provide a valid id.");
 
   const student: Student | null = await StudentModel.findById(studentId)
     .select("classroom")
-    .populate({
-      path: "classroom",
-      model: "Classroom",
-      select: "schedule",
-      populate: {
-        path: "schedule",
-        model: "Schedule",
-      },
-    });
+    .populate("classroom");
 
   if (!student) {
     throw new NotFoundError("Student not found!");
   }
 
-  const instructor: Instructor | null = await InstructorModel.findById(
-    instructorId,
-  )
-    .select("classroom")
-    .populate({
-      path: "classroom",
-      model: "Classroom",
-      select: "students",
-      populate: {
-        path: "students",
-        model: "Student",
-      },
-    });
+  const classroom: Classroom | null = await ClassroomModel.findById(
+    classRoomId,
+  ).populate("instructor");
 
-  if (!instructor) {
-    throw new NotFoundError("Instructor not found!");
+  if (!classroom) {
+    throw new NotFoundError("Classroom not found!");
   }
 
-  const classroomId = instructor.classroom._id;
+  const ownClassDay = student.classroom.find((el) =>
+    el.schedule.some((schedule) => schedule.day === day),
+  );
 
-  if (student.classroom) {
-    console.log("Aluno tem aula!");
-    console.log(student.classroom);
-    //console.log(student.classroom.schedule);
-    console.log(instructor.classroom.schedule);
-  }
-
-  const index = instructor.classroom.students.findIndex((aluno) => {
-    return aluno.id.trim() === student.id.trim();
-  });
-
-  if (index !== -1) {
+  if (classroom.students.includes(student.id)) {
     throw new BadRequestError("You are already subscribed to this teacher");
   }
 
-  // Implementar aqui calendário
+  if (ownClassDay) {
+    const times: IconflictTime[] = [];
+    for (const classroom of student.classroom) {
+      for (const schedule of classroom.schedule) {
+        if (schedule.day === day) {
+          times.push({
+            startTime: schedule.startTime,
+            endTime: schedule.endTime,
+          });
+        }
+      }
+    }
 
-  if (instructor.classroom.students.length < 30) {
-    const classroom = await ClassroomModel.findByIdAndUpdate(classroomId, {
+    if (conflictTime(startTime, endTime, times)) {
+      throw new BadRequestError(
+        "Unfortunately this class is in conflict with another class!",
+      );
+    }
+  }
+
+  if (classroom.students.length < 30) {
+    await ClassroomModel.findByIdAndUpdate(classRoomId, {
       $push: { students: student },
     });
 
-    await StudentModel.findByIdAndUpdate(studentId, {
+    const studentUser = await StudentModel.findByIdAndUpdate(studentId, {
       $push: { classroom: classroom },
     });
+
+    if (!studentUser) throw new NotFoundError("Student not found!");
+
+    sendMailSubscription(studentUser, classroom, day, startTime, endTime);
 
     return res
       .status(200)
@@ -91,35 +209,256 @@ export const enrollSubject = async (req: Request, res: Response) => {
   );
 };
 
-// export const unsubscribeInstructor = async (req: Request, res: Response) => {
-//   const instructorId = req.params.id;
-//   const studentId = (req as Payload).user._id;
+/**
+ * @swagger
+ * /students/unrollSubject/{studentId}/{classRoomId}:
+ *  patch:
+ *    tags:
+ *      - Student
+ *    summary: Unsubscribe student from a class
+ *    description: Unsubscribe student from a class
+ *    parameters:
+ *      - name: studentId
+ *        in: path
+ *        description: The id of the student
+ *        required: true
+ *      - name: classRoomId
+ *        in: path
+ *        description: The id of the classroom
+ *        required: true
+ *    responses:
+ *      200:
+ *        description: Ok
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: You canceled your subscription
+ *      400:
+ *        description: Bad Request
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Please provide a valid id.
+ *      404:
+ *        description: Not Found
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: You are not enrolled in this class!
+ *      500:
+ *        description: Internal Server Error
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Internal Server Error
+ *
+ */
 
-//   if (!mongoose.isValidObjectId(instructorId))
-//     throw new BadRequestError("Please provide a valid id.");
+export const unrollSubject = async (req: Request, res: Response) => {
+  const { studentId, classRoomId } = req.params;
 
-//   const student: Student | null = await StudentModel.findById(studentId);
+  if (
+    !mongoose.isValidObjectId(studentId) ||
+    !mongoose.isValidObjectId(classRoomId)
+  )
+    throw new BadRequestError("Please provide a valid id.");
 
-//   if (!student) {
-//     throw new NotFoundError("Student not found!");
-//   }
+  const classroom: Classroom | null = await ClassroomModel.findById(
+    classRoomId,
+  );
 
-//   const instructor: Instructor | null = await InstructorModel.findById(
-//     instructorId,
-//   );
+  if (!classroom) {
+    throw new NotFoundError("Student not found!");
+  }
 
-//   if (!instructor) {
-//     throw new NotFoundError("Instructor not found!");
-//   }
-//   const objectStudentId = new mongoose.Types.ObjectId(student._id);
+  const student: Student | null = await StudentModel.findById(studentId);
 
-//   if (!instructor.students.includes(objectStudentId)) {
-//     throw new BadRequestError("You are not subscribed to this teacher");
-//   }
+  if (!student) {
+    throw new NotFoundError("Student not found!");
+  }
 
-//   await InstructorModel.findByIdAndUpdate(instructorId, {
-//     $pull: { students: student._id },
-//   });
+  if (!student.classroom.includes(classroom._id)) {
+    throw new NotFoundError("You are not enrolled in this class!");
+  }
 
-//   return res.status(200).json({ message: "You canceled your subscription" });
-// };
+  await ClassroomModel.findByIdAndUpdate(classRoomId, {
+    $pull: { students: student._id },
+  });
+
+  await StudentModel.findByIdAndUpdate(studentId, {
+    $pull: { classroom: classroom._id },
+  });
+
+  return res.status(200).json({ message: "You canceled your subscription" });
+};
+
+/**
+ * @swagger
+ * /students/uploadAssignment/{studentId}/{classRoomId}:
+ *  post:
+ *    tags:
+ *      - Student
+ *    summary: Upload student files
+ *    description: Sending student documents, which are restricted to pdf, docs, txt and size up to 3 mb
+ *    parameters:
+ *      - name: studentId
+ *        in: path
+ *        description: The id of the student
+ *        required: true
+ *      - name: classRoomId
+ *        in: path
+ *        description: The id of the classroom
+ *        required: true
+ *    requestBody:
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *               studentFile:
+ *                type: file
+ *    responses:
+ *      200:
+ *        description: Ok
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Success! File uploaded
+ *      400:
+ *        description: Bad Request
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Something went wrong when uploading file. No file posted to be uploaded.
+ *      404:
+ *        description: Not Found
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Student not found!
+ *      500:
+ *        description: Internal Server Error
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Internal Server Error
+ *
+ */
+
+export const studentUploadFile = async (req: Request, res: Response) => {
+  const { studentId, classRoomId } = req.params;
+  let file = undefined;
+
+  if (req.files) {
+    file = req.files.studentFile as UploadedFile;
+  } else {
+    throw new BadRequestError(
+      "Something went wrong when uploading file. No file posted to be uploaded.",
+    );
+  }
+
+  if (
+    !mongoose.isValidObjectId(classRoomId) ||
+    !mongoose.isValidObjectId(studentId)
+  )
+    throw new BadRequestError("Please provide a valid id.");
+
+  const student: Student | null = await StudentModel.findById(studentId);
+
+  if (!student) {
+    throw new NotFoundError("Student not found!");
+  }
+
+  const classroom: Classroom | null = await ClassroomModel.findById(classRoomId)
+    .select("documents")
+    .populate("documents");
+
+  if (!classroom) {
+    throw new NotFoundError("Classroom not found!");
+  }
+
+  if (file.size > 1024 * 1024 * 3) {
+    throw new BadRequestError(
+      "File size too big, provide a file with size less or equal than 3MB.",
+    );
+  }
+
+  if (
+    !file.name.endsWith("pdf") &&
+    !file.name.endsWith("docx") &&
+    !file.name.endsWith("txt")
+  ) {
+    throw new BadRequestError(
+      "Please, try uploading a valid file type (pdf, docx, txt).",
+    );
+  }
+
+  const actualTime = `${new Date().getHours().toString()}-${new Date()
+    .getMinutes()
+    .toString()}-${new Date().getSeconds().toString()}`;
+
+  let extension;
+
+  if (file.name.endsWith("docx")) {
+    extension = file.name.slice(-5);
+  } else {
+    extension = file.name.slice(-4);
+  }
+
+  const newFileName = `${file.name.slice(0, -4)}-${actualTime}${extension}`;
+
+  file.name = newFileName;
+
+  const filePath = path.join(__dirname, "../../../temp/" + `${file.name}`);
+
+  file.mv(filePath, (err: Error) => {
+    if (err) {
+      throw new InternalServerError(`Failed to move file: ${err.message}`);
+    }
+  });
+  const File = new StudentFileModel({
+    authorId: studentId,
+    fileName: file.name,
+    filePath: `../../temp/${file.name}`,
+  });
+
+  await File.save();
+
+  await ClassroomModel.findByIdAndUpdate(classRoomId, {
+    $push: { documents: File },
+  });
+
+  res.status(200).json({ message: "Success! File uploaded" });
+};

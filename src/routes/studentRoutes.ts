@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  getStudents,
   createStudent,
   updateStudent,
   deleteStudent,
@@ -9,7 +8,8 @@ import {
 import {
   listSubjects,
   enrollSubject,
-  // unsubscribeInstructor,
+  unrollSubject,
+  studentUploadFile,
 } from "@/controllers/studentsControllers/studentsFunctionalities";
 
 import { authentication, authorizeRoles } from "@/middlewares/authentication";
@@ -19,19 +19,14 @@ const router = express.Router();
 router.post("/students", createStudent);
 
 router.put(
-  "/students",
+  "/students/:id",
   authentication,
   authorizeRoles("student"),
   updateStudent,
 );
-router.get(
-  "/students",
-  authentication,
-  authorizeRoles("student", "instructor"),
-  getStudents,
-);
+
 router.delete(
-  "/students",
+  "/students/:id",
   authentication,
   authorizeRoles("student"),
   deleteStudent,
@@ -47,17 +42,24 @@ router.get(
 );
 
 router.post(
-  "/students/enrollSubject/:studentId/:instructorId",
+  "/students/enrollSubject/:studentId/:classRoomId",
   authentication,
   authorizeRoles("student"),
   enrollSubject,
 );
 
-// router.post(
-//   "/students/unsubscribeInstructor/:id",
-//   authentication,
-//   authorizeRoles("student"),
-//   unsubscribeInstructor,
-// );
+router.patch(
+  "/students/unrollSubject/:studentId/:classRoomId",
+  authentication,
+  authorizeRoles("student"),
+  unrollSubject,
+);
+
+router.post(
+  "/students/uploadAssignment/:studentId/:classRoomId",
+  authentication,
+  authorizeRoles("student"),
+  studentUploadFile,
+);
 
 export { router };

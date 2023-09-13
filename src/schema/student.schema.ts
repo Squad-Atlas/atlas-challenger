@@ -74,4 +74,19 @@
  *              __v:
  *                  type: integer
  *                  example: 0
+ *      ListStudents:
+ *          type: object
+ *          properties:
+ *              _id:
+ *                  type: string
+ *                  example: 64ecdbfeb0346a88964bcc55
+ *              name:
+ *                  type: string
+ *                  example: "Diego"
+ *              email:
+ *                  type: string
+ *                  example: "Diego@email.com"
+ *              phone:
+ *                  type: string
+ *                  example: "1140028922"
  */
