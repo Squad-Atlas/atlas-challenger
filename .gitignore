@@ -2,3 +2,4 @@ node_modules
 dist
 .env
 seed.ts
+temp

@@ -1,13 +1,14 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { Instructor } from "./instructor";
 import { Student } from "./student";
+import { StudentsFiles } from "./studentsFile";
 
 export interface Classroom extends Document {
   subject: string;
   instructor: Instructor;
   schedule: Schedule[];
   students: Student[];
-  documents: Documents[];
+  documents: StudentsFiles[];
   linkClassroom: string;
 }
 
@@ -15,11 +16,6 @@ interface Schedule {
   day: string;
   startTime: string;
   endTime: string;
-}
-
-interface Documents {
-  authorId: string;
-  path: string;
 }
 
 const ClassroomSchema = new Schema<Classroom>(
@@ -43,9 +39,8 @@ const ClassroomSchema = new Schema<Classroom>(
     ],
     documents: [
       {
-        _id: false,
-        authorId: { type: String },
-        path: { type: String },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "File",
         default: [],
       },
     ],

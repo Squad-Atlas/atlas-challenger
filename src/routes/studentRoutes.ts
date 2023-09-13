@@ -9,6 +9,7 @@ import {
   listSubjects,
   enrollSubject,
   unrollSubject,
+  studentUploadFile,
 } from "@/controllers/studentsControllers/studentsFunctionalities";
 
 import { authentication, authorizeRoles } from "@/middlewares/authentication";
@@ -18,14 +19,14 @@ const router = express.Router();
 router.post("/students", createStudent);
 
 router.put(
-  "/students",
+  "/students/:id",
   authentication,
   authorizeRoles("student"),
   updateStudent,
 );
 
 router.delete(
-  "/students",
+  "/students/:id",
   authentication,
   authorizeRoles("student"),
   deleteStudent,
@@ -52,6 +53,13 @@ router.patch(
   authentication,
   authorizeRoles("student"),
   unrollSubject,
+);
+
+router.post(
+  "/students/uploadAssignment/:studentId/:classRoomId",
+  authentication,
+  authorizeRoles("student"),
+  studentUploadFile,
 );
 
 export { router };
