@@ -4,7 +4,6 @@ import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 import mongoose from "mongoose";
 import "express-async-errors";
 import { validateFields } from "@/utils/validationUtils";
-import { Payload } from "@/middlewares/authentication";
 
 /**
  * @swagger
@@ -101,7 +100,7 @@ export const createStudent = async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /students:
+ * /students/{id}:
  *  put:
  *    security:
  *      - cookieAuth: []
@@ -110,6 +109,11 @@ export const createStudent = async (req: Request, res: Response) => {
  *      - Student
  *    summary: Update a student
  *    description: Update an student by id
+ *    parameters:
+ *      - name: id
+ *        in: path
+ *        description: The id of the student
+ *        required: true
  *    requestBody:
  *      content:
  *        application/json:
@@ -156,9 +160,9 @@ export const createStudent = async (req: Request, res: Response) => {
  */
 
 export const updateStudent = async (req: Request, res: Response) => {
-  const { _id } = (req as Payload).user;
+  const { id } = req.params;
 
-  if (!mongoose.isValidObjectId(_id))
+  if (!mongoose.isValidObjectId(id))
     throw new BadRequestError("Please provide a valid id");
 
   const newStudentData: Student = req.body;
@@ -169,7 +173,7 @@ export const updateStudent = async (req: Request, res: Response) => {
   }
 
   const updatedStudent: Student | null = await StudentModel.findByIdAndUpdate(
-    _id,
+    id,
     newStudentData,
     {
       new: true,
@@ -188,7 +192,7 @@ export const updateStudent = async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /students:
+ * /students/{id}:
  *  delete:
  *    security:
  *      - cookieAuth: []
@@ -197,6 +201,11 @@ export const updateStudent = async (req: Request, res: Response) => {
  *      - Student
  *    summary: Delete a student
  *    description: Delete an student by id
+ *    parameters:
+ *      - name: id
+ *        in: path
+ *        description: The id of the student
+ *        required: true
  *    responses:
  *      200:
  *        description: Success delete student
@@ -241,12 +250,12 @@ export const updateStudent = async (req: Request, res: Response) => {
  */
 
 export const deleteStudent = async (req: Request, res: Response) => {
-  const { _id } = (req as Payload).user;
+  const { id } = req.params;
 
-  if (!mongoose.isValidObjectId(_id))
+  if (!mongoose.isValidObjectId(id))
     throw new BadRequestError("Please provide a valid id");
 
-  const deletedStudent = await StudentModel.findByIdAndDelete(_id);
+  const deletedStudent = await StudentModel.findByIdAndDelete(id);
 
   if (!deletedStudent) throw new NotFoundError("Student not found!");
 

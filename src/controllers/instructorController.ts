@@ -4,7 +4,6 @@ import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 import mongoose from "mongoose";
 import "express-async-errors";
 import { validateFields } from "@/utils/validationUtils";
-import { Payload } from "@/middlewares/authentication";
 
 /**
  * @swagger
@@ -114,7 +113,7 @@ export const createInstructor = async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /instructors:
+ * /instructors/{id}:
  *  put:
  *    security:
  *      - cookieAuth: []
@@ -123,6 +122,11 @@ export const createInstructor = async (req: Request, res: Response) => {
  *      - Instructor
  *    summary: Update a Instructor
  *    description: Update an instructor by id
+ *    parameters:
+ *      - name: id
+ *        in: path
+ *        description: The id of the instructor
+ *        requuired: true
  *    requestBody:
  *      required: true
  *      content:
@@ -170,9 +174,9 @@ export const createInstructor = async (req: Request, res: Response) => {
  */
 
 export const updateInstructor = async (req: Request, res: Response) => {
-  const { _id } = (req as Payload).user;
+  const { id } = req.params;
 
-  if (!mongoose.isValidObjectId(_id))
+  if (!mongoose.isValidObjectId(id))
     throw new BadRequestError("Please provide a valid id.");
 
   const newInstructorData: Instructor = req.body;
@@ -183,7 +187,7 @@ export const updateInstructor = async (req: Request, res: Response) => {
   }
 
   const updatedInstructor: Instructor | null =
-    await InstructorModel.findByIdAndUpdate(_id, newInstructorData, {
+    await InstructorModel.findByIdAndUpdate(id, newInstructorData, {
       new: true,
     });
 
@@ -199,7 +203,7 @@ export const updateInstructor = async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /instructors:
+ * /instructors/{id}:
  *  delete:
  *    security:
  *      - cookieAuth: []
@@ -208,6 +212,11 @@ export const updateInstructor = async (req: Request, res: Response) => {
  *      - Instructor
  *    summary: Delete a Instructor
  *    description: Delete an instructor by id
+ *    parameters:
+ *      - name: id
+ *        in: path
+ *        description: The id of the instructor
+ *        requuired: true
  *    responses:
  *      200:
  *        description: Success delete instructor
@@ -252,12 +261,12 @@ export const updateInstructor = async (req: Request, res: Response) => {
  */
 
 export const deleteInstructor = async (req: Request, res: Response) => {
-  const { _id } = (req as Payload).user;
+  const { id } = req.params;
 
-  if (!mongoose.isValidObjectId(_id))
+  if (!mongoose.isValidObjectId(id))
     throw new BadRequestError("Please provide a valid id");
 
-  const deletedInstructor = await InstructorModel.findByIdAndDelete(_id);
+  const deletedInstructor = await InstructorModel.findByIdAndDelete(id);
 
   if (!deletedInstructor) throw new NotFoundError("Instructor not found!");
 
