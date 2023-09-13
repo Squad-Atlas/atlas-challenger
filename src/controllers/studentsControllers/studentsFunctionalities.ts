@@ -308,6 +308,75 @@ export const unrollSubject = async (req: Request, res: Response) => {
   return res.status(200).json({ message: "You canceled your subscription" });
 };
 
+/**
+ * @swagger
+ * /students/uploadAssignment/{studentId}/{classRoomId}:
+ *  post:
+ *    tags:
+ *      - Student
+ *    summary: Upload student files
+ *    description: Sending student documents, which are restricted to pdf, docs, txt and size up to 3 mb
+ *    parameters:
+ *      - name: studentId
+ *        in: path
+ *        description: The id of the student
+ *        required: true
+ *      - name: classRoomId
+ *        in: path
+ *        description: The id of the classroom
+ *        required: true
+ *    requestBody:
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *               studentFile:
+ *                type: file
+ *    responses:
+ *      200:
+ *        description: Ok
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Success! File uploaded
+ *      400:
+ *        description: Bad Request
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Something went wrong when uploading file. No file posted to be uploaded.
+ *      404:
+ *        description: Not Found
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Student not found!
+ *      500:
+ *        description: Internal Server Error
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  default: Internal Server Error
+ *
+ */
+
 export const studentUploadFile = async (req: Request, res: Response) => {
   const { studentId, classRoomId } = req.params;
   const file = req.files!.studentFile as UploadedFile;
