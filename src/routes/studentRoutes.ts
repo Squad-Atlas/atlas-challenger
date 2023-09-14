@@ -13,6 +13,7 @@ import {
 } from "@/controllers/studentsControllers/studentsFunctionalities";
 
 import { authentication, authorizeRoles } from "@/middlewares/authentication";
+import { registerList } from "@/controllers/studentsControllers/studentsList";
 
 const router = express.Router();
 
@@ -54,6 +55,16 @@ router.patch(
   authorizeRoles("student"),
   unrollSubject,
 );
+
+// studentList
+
+router.get(
+  "/students/registerList/:id",
+  authentication,
+  authorizeRoles("student"),
+  registerList,
+);
+
 
 router.post(
   "/students/uploadAssignment/:studentId/:classRoomId",
