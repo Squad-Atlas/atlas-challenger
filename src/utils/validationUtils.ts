@@ -1,10 +1,5 @@
-/*eslint-disable @typescript-eslint/no-explicit-any */
-
 import { Student } from "@/models/student";
 import { Instructor } from "../models/instructor";
-import InstructorModel from "@/models/instructor";
-import StudentModel from "@/models/student";
-import { Request } from "express";
 
 export interface ValidationErrors {
   msgErrors: string;
@@ -55,46 +50,4 @@ export function validateFields(data: Instructor | Student): ValidationErrors {
   }
 
   return errors;
-}
-
-export async function validateRepeatedUser(req: Request, table: string) {
-  let repeatedEmailToSearch: any;
-  let repeatedPhoneNumberToSearch: any;
-  let repeatedUserToSearch: any;
-
-  if (table === "instructor") {
-    repeatedEmailToSearch = await InstructorModel.find({
-      email: req.body.email,
-    });
-    repeatedUserToSearch = await InstructorModel.find({ user: req.body.user });
-    repeatedPhoneNumberToSearch = await InstructorModel.find({
-      phone: req.body.phone,
-    });
-
-    if (
-      repeatedEmailToSearch.length > 0 ||
-      repeatedUserToSearch.length > 0 ||
-      repeatedPhoneNumberToSearch.length > 0
-    ) {
-      return true;
-    }
-  }
-
-  if (table === "student") {
-    repeatedEmailToSearch = await StudentModel.find({ email: req.body.email });
-    repeatedUserToSearch = await StudentModel.find({ user: req.body.user });
-    repeatedPhoneNumberToSearch = await StudentModel.find({
-      phone: req.body.phone,
-    });
-
-    if (
-      repeatedEmailToSearch.length > 0 ||
-      repeatedUserToSearch.length > 0 ||
-      repeatedPhoneNumberToSearch.length > 0
-    ) {
-      return true;
-    }
-  }
-
-  return false;
 }
