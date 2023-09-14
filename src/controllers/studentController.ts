@@ -8,43 +8,6 @@ import { validateFields } from "@/utils/validationUtils";
 /**
  * @swagger
  * /students:
- *  get:
- *    security:
- *      - cookieAuth: []
- *      - bearerAuth: []
- *    tags:
- *      - Student
- *    summary: Get all students
- *    description: Returns a list of all students
- *    responses:
- *      200:
- *        description: A list of students
- *        content:
- *          application/json:
- *            schema:
- *              type: array
- *              items:
- *                $ref: "#/components/schemas/StudentResponse"
- *      500:
- *        description: Internal Server Error
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                message:
- *                  type: string
- *                  default: Internal Server Error
- */
-
-export const getStudents = async (_req: Request, res: Response) => {
-  const students: Student[] = await StudentModel.find();
-  res.status(200).json(students);
-};
-
-/**
- * @swagger
- * /students:
  *  post:
  *    tags:
  *      - Student

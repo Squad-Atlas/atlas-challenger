@@ -1,7 +1,6 @@
 import express from "express";
 
 import {
-  getInstructors,
   createInstructor,
   updateInstructor,
   deleteInstructor,
@@ -10,6 +9,7 @@ import {
 import {
   listStudents,
   registerClass,
+  unsubscribeStudent,
 } from "@/controllers/instructorControllers/instructorsFunctionalities";
 
 import { authentication, authorizeRoles } from "@/middlewares/authentication";
@@ -24,12 +24,7 @@ router.put(
   authorizeRoles("instructor"),
   updateInstructor,
 );
-router.get(
-  "/instructors",
-  authentication,
-  authorizeRoles("student", "instructor"),
-  getInstructors,
-);
+
 router.delete(
   "/instructors/:id",
   authentication,
@@ -51,6 +46,13 @@ router.post(
   authentication,
   authorizeRoles("instructor"),
   registerClass,
+);
+
+router.delete(
+  "/instructors/unsubscribeStudent/:instructorId/:studentId",
+  authentication,
+  authorizeRoles("instructor"),
+  unsubscribeStudent,
 );
 
 export { router };

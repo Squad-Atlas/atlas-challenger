@@ -4,7 +4,6 @@ export interface StudentsFiles {
   authorId: string;
   fileName: string;
   filePath: string;
-  fileObject: object;
 }
 
 const FileSchema = new Schema<StudentsFiles>(
