@@ -1,37 +1,75 @@
+import { NotFoundError } from "@/helpers/api-errors";
 import ClassroomModel from "@/models/classroom";
 import { Request, Response } from "express";
 
-export const getList = async (req: Request, res: Response) => {
-    try {
-        const getListInstructor = await ClassroomModel.findById({
-            instructors: req.params.id
-        })
-        return res.status(200).json(getListInstructor);
+/**
+ * @swagger
+ * /instructors/getClassroom/{id}:
+ *  get:
+ *    tags:
+ *      - Instructor
+ *    summary: Return of information from the teacher's class
+ *    description: Return of information from the teacher's class
+ *    parameters:
+ *      - name: id
+ *        in: path
+ *        description: The id of the instructor
+ *        required: true
+ *    responses:
+ *      200:
+ *        description: Returns class document
+ *      404:
+ *        description: Classroom not found!
+ *      500:
+ *        description: Internal Server Error
+ *
+ */
 
-    } catch (error) {
-        return res.sendStatus(500);
-    }
-}
+export const getClassroom = async (req: Request, res: Response) => {
+  const getClassroom = await ClassroomModel.find({
+    instructor: req.params.id,
+  });
 
-export const updateList = async (req: Request, res: Response) => {
-    try {
-        const updateListInstructor = await ClassroomModel.findByIdAndUpdate({
-            instructors: req.params.id,
-        });
-        return res.status(200).json(updateListInstructor);
-    } catch (error) {
-        return res.sendStatus(500);
-    }
-}
+  if (!getClassroom) throw new NotFoundError("Classroom not found!");
 
+  return res.status(200).json(getClassroom);
+};
 
-export const deleteList = async (req: Request, res: Response) => {
-    try {
-        const deleteListInstructor = await ClassroomModel.findByIdAndDelete({
-            instructor: req.params.id
-        })
-        return res.status(200).json(deleteListInstructor);
-    } catch (error) {
-        return res.sendStatus(500);
-    }
-}
+export const updateClassroom = async (req: Request, res: Response) => {
+  const updateClassroom = await ClassroomModel.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+  );
+  return res.status(200).json(updateClassroom);
+};
+
+/**
+ * @swagger
+ * /instructors/deleteClassroom/{id}:
+ *  delete:
+ *    tags:
+ *      - Instructor
+ *    summary: Delete a teacher's class
+ *    description: Delete a teacher's class
+ *    parameters:
+ *      - name: id
+ *        in: path
+ *        description: The id of the instructor
+ *        required: true
+ *    responses:
+ *      200:
+ *        description: Successfully deleted
+ *      404:
+ *        description: Classroom not found!
+ *      500:
+ *        description: Internal Server Error
+ *
+ */
+
+export const deleteClassroom = async (req: Request, res: Response) => {
+  const deleteClassroom = await ClassroomModel.findByIdAndDelete(req.params.id);
+
+  if (!deleteClassroom) throw new NotFoundError("Classroom not found!");
+
+  return res.status(200).json({ message: "Classroom deleted successfully" });
+};
