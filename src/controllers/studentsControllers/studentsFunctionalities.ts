@@ -17,6 +17,9 @@ import path from "path";
  * @swagger
  * /students/listSubjects:
  *  get:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Student
  *    summary: List classes
@@ -54,6 +57,9 @@ export const listSubjects = async (req: Request, res: Response) => {
  * @swagger
  * /students/enrollSubject/{studentId}/{classRoomId}:
  *  post:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Student
  *    summary: Sign up for a class
@@ -213,6 +219,9 @@ export const enrollSubject = async (req: Request, res: Response) => {
  * @swagger
  * /students/unrollSubject/{studentId}/{classRoomId}:
  *  patch:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Student
  *    summary: Unsubscribe student from a class
@@ -312,6 +321,9 @@ export const unrollSubject = async (req: Request, res: Response) => {
  * @swagger
  * /students/uploadAssignment/{studentId}/{classRoomId}:
  *  post:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Student
  *    summary: Upload student files

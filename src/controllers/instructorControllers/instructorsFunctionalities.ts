@@ -9,6 +9,9 @@ import mongoose from "mongoose";
  * @swagger
  * /instructors/listStudents/{id}:
  *  get:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Instructor
  *    summary: List registered students
@@ -86,6 +89,9 @@ export const listStudents = async (req: Request, res: Response) => {
  * @swagger
  * /instructors/registerClass/{id}:
  *  post:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Instructor
  *    summary: Register a class
@@ -174,6 +180,9 @@ export const registerClass = async (req: Request, res: Response) => {
  * @swagger
  * /instructors/unsubscribeStudent/{instructorId}/{studentId}:
  *  delete:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Instructor
  *    summary: Unsubscribe student from a class

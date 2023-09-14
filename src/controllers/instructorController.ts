@@ -4,6 +4,7 @@ import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 import mongoose from "mongoose";
 import "express-async-errors";
 import { validateFields } from "@/utils/validationUtils";
+import StudentModel from "@/models/student";
 
 /**
  * @swagger
@@ -56,6 +57,18 @@ export const createInstructor = async (req: Request, res: Response) => {
 
   if (validationErrors.msgErrors) {
     throw new BadRequestError(validationErrors.msgErrors);
+  }
+
+  const isRepeatedUser = await StudentModel.findOne({
+    $or: [
+      { user: req.body.user },
+      { phone: req.body.phone },
+      { email: req.body.email },
+    ],
+  });
+
+  if (isRepeatedUser) {
+    throw new BadRequestError("User already registered.");
   }
 
   const newInstructor: Instructor = new InstructorModel(newInstructorData);

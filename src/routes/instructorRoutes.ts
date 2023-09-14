@@ -13,6 +13,11 @@ import {
 } from "@/controllers/instructorControllers/instructorsFunctionalities";
 
 import { authentication, authorizeRoles } from "@/middlewares/authentication";
+import {
+  getClassroom,
+  deleteClassroom,
+  updateClassroom,
+} from "@/controllers/instructorControllers/instructorList";
 
 const router = express.Router();
 
@@ -53,6 +58,29 @@ router.delete(
   authentication,
   authorizeRoles("instructor"),
   unsubscribeStudent,
+);
+
+// instructorList
+
+router.get(
+  "/instructors/getClassroom/:id",
+  authentication,
+  authorizeRoles("instructor"),
+  getClassroom,
+);
+
+router.post(
+  "/instructors/updateClassroom/:id",
+  authentication,
+  authorizeRoles("instructor"),
+  updateClassroom,
+);
+
+router.delete(
+  "/instructors/deleteClassroom/:id",
+  authentication,
+  authorizeRoles("instructor"),
+  deleteClassroom,
 );
 
 export { router };
