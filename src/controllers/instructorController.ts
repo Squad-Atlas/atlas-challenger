@@ -3,7 +3,7 @@ import InstructorModel, { Instructor } from "@/models/instructor";
 import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 import mongoose from "mongoose";
 import "express-async-errors";
-import { validateFields } from "@/utils/validationUtils";
+import { validateFields, validateRepeatedUser } from "@/utils/validationUtils";
 
 /**
  * @swagger
@@ -56,6 +56,12 @@ export const createInstructor = async (req: Request, res: Response) => {
 
   if (validationErrors.msgErrors) {
     throw new BadRequestError(validationErrors.msgErrors);
+  }
+
+  const isRepeatedUser = await validateRepeatedUser(req, "student");
+
+  if (isRepeatedUser) {
+    throw new BadRequestError("User already registered.");
   }
 
   const newInstructor: Instructor = new InstructorModel(newInstructorData);
