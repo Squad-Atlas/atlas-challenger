@@ -1,7 +1,6 @@
 import express from "express";
 
 import {
-  getInstructors,
   createInstructor,
   updateInstructor,
   deleteInstructor,
@@ -10,6 +9,7 @@ import {
 import {
   listStudents,
   registerClass,
+  unsubscribeStudent,
 } from "@/controllers/instructorControllers/instructorsFunctionalities";
 
 import { authentication, authorizeRoles } from "@/middlewares/authentication";
@@ -20,19 +20,14 @@ const router = express.Router();
 router.post("/instructors", createInstructor);
 
 router.put(
-  "/instructors",
+  "/instructors/:id",
   authentication,
   authorizeRoles("instructor"),
   updateInstructor,
 );
-router.get(
-  "/instructors",
-  authentication,
-  authorizeRoles("student", "instructor"),
-  getInstructors,
-);
+
 router.delete(
-  "/instructors",
+  "/instructors/:id",
   authentication,
   authorizeRoles("instructor"),
   deleteInstructor,
@@ -53,7 +48,6 @@ router.post(
   authorizeRoles("instructor"),
   registerClass,
 );
-
 
 // instructorList
 
@@ -77,6 +71,13 @@ router.delete(
   authentication,
   authorizeRoles("instructor"),
   deleteList,
+);
+
+router.delete(
+  "/instructors/unsubscribeStudent/:instructorId/:studentId",
+  authentication,
+  authorizeRoles("instructor"),
+  unsubscribeStudent,
 );
 
 export { router };
