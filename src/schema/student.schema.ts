@@ -28,11 +28,6 @@
  *                  type: string
  *                  format: password
  *                  example: "Password@123"
- *              areasOfInterest:
- *                  type: array
- *                  items:
- *                      type: string
- *                  example: ["Math", "Portuguese"]
  *
  *      StudentResponse:
  *          type: object

@@ -26,11 +26,6 @@
  *              password:
  *                  type: string
  *                  example: "Password@123"
- *              specialty:
- *                  type: array
- *                  items:
- *                      type: string
- *                  example: ["Math", "Portuguese"]
  *
  *      InstructorResponse:
  *          type: object
