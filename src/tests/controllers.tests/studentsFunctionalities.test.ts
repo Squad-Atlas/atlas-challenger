@@ -17,7 +17,6 @@ interface IUploadedFile {
   name: string;
   extension: string;
   mv: (arg: string, cb: (err: any) => void) => void;
-  date: string;
   size: number;
 }
 
@@ -34,6 +33,16 @@ describe("studentsFunctionalities test suite", () => {
       return;
     }
 
+    function createFileName(file: IUploadedFile) {
+      const actualTime = `${new Date().getHours().toString()}-${new Date()
+        .getMinutes()
+        .toString()}-${new Date().getSeconds().toString()}`;
+
+      const newFileName = `${file.name}-${actualTime}${file.extension}`;
+
+      return newFileName;
+    }
+
     beforeEach(() => {
       function errorFunction(error: string): void {
         console.log(error);
@@ -43,20 +52,17 @@ describe("studentsFunctionalities test suite", () => {
         name: "file",
         extension: ".pdf",
         mv: (path: string, errorFunction) => {
-          correctFormSut.name =
-            correctFormSut.name +
-            correctFormSut.date +
-            correctFormSut.extension;
+          correctFormSut.name = createFileName(correctFormSut);
           local.push(correctFormSut);
         },
-        date: "15-12-06",
+
         size: 2,
       };
 
       incorrectFormSut = {
         ...correctFormSut,
         size: 6,
-        extension: "exe",
+        extension: ".exe",
       };
     });
 
@@ -89,6 +95,24 @@ describe("studentsFunctionalities test suite", () => {
         expect(error).toBeInstanceOf(BadRequestError);
         expect(error).toHaveProperty("message", "File too big.");
       }
+    });
+
+    it("should create files with different names", () => {
+      const req1 = {
+        files: { studentFile: { ...correctFormSut } },
+      };
+
+      const file1 = req1.files.studentFile;
+
+      file1.mv("../../temp", (err: any) => console.log(err));
+
+      const req2 = { files: { studentFile: { ...correctFormSut } } };
+
+      const file2 = req2.files.studentFile;
+
+      file2.mv("../../temp", (err: any) => console.log(err));
+
+      expect(file1.name).not.toMatch(file2.name);
     });
   });
 });
