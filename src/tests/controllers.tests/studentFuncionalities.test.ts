@@ -3,6 +3,7 @@ import listSubjectMock from "../mocks/listSubjectMock";
 import { BadRequestError } from "@/helpers/api-errors";
 import {
   IUploadedFile,
+  MockReqFiles,
   checksFileSize,
   createFileName,
 } from "../mocks/fileUpload";
@@ -30,6 +31,17 @@ describe("validateStudentEnrollment", () => {
 });
 
 import validateScheduleConflict from "@/tests/mocks/validateScheduleConflict";
+import { StudentsFiles } from "@/models/studentsFile";
+import { ObjectId } from "mongodb";
+import {
+  invalidClassId,
+  invalidStudentId,
+  objectToReferenceFileMock,
+  reqFilesInvalidMock,
+  reqFilesMock,
+  validClassId,
+  validStudentId,
+} from "../mocks/mocks";
 
 describe("validateScheduleConflict", () => {
   it("should return an empty array when there are no schedule conflicts", () => {
@@ -160,5 +172,76 @@ describe("studentUploadFile test suite", () => {
     file2.mv("../../temp", (err: Error) => console.log(err));
 
     expect(file1.name).not.toMatch(file2.name);
+  });
+});
+
+describe("studentUploadFile test suite 2", () => {
+  const classFilesReference: StudentsFiles[] = [];
+
+  const mockUploadObjectReferenceToFileToDB = jest.fn(
+    (StudentFile: StudentsFiles) => classFilesReference.push(StudentFile),
+  );
+
+  const mockValidateParams = jest.fn(
+    (StudentId, ClassId) =>
+      StudentId instanceof ObjectId && ClassId instanceof ObjectId,
+  );
+
+  const mockValidateFileType = jest.fn((mockReqFile: MockReqFiles): boolean => {
+    if (
+      mockReqFile.name.endsWith("txt") ||
+      mockReqFile.name.endsWith("pdf") ||
+      mockReqFile.name.endsWith("docx")
+    ) {
+      return true;
+    }
+    return false;
+  });
+
+  describe("Upload File", () => {
+    const req = {
+      files: reqFilesMock,
+      params: { validStudentId, validClassId },
+    };
+
+    it("should return true if the params are valid", () => {
+      expect(
+        mockValidateParams(req.params.validStudentId, req.params.validClassId),
+      ).toBe(true);
+    });
+
+    it("should return true for valid files (txt, pdf, docx)", () => {
+      expect(mockValidateFileType(req.files)).toBe(true);
+    });
+
+    it("should return a new object to reference the file in the server", () => {
+      const objectToReferenceFileMockTest: StudentsFiles = {
+        authorId: `${req.params.validStudentId}`,
+        fileName: req.files.name,
+        filePath: "./../../temp/" + `${req.files.name}`,
+      };
+      expect(objectToReferenceFileMockTest).toEqual(objectToReferenceFileMock);
+    });
+
+    it("should move file to DB (local array)", () => {
+      const initialDBLength = classFilesReference.length;
+      mockUploadObjectReferenceToFileToDB(objectToReferenceFileMock);
+      const finalDBLength = classFilesReference.length;
+      expect(finalDBLength).toBeGreaterThan(initialDBLength);
+    });
+  });
+
+  describe("Failed cases", () => {
+    const req = {
+      files: reqFilesInvalidMock,
+      params: { invalidStudentId, invalidClassId },
+    };
+
+    it("should return error messages for invalid studentId or classId", () => {
+      expect(mockValidateParams(invalidStudentId, invalidClassId)).toBe(false);
+    });
+    it("should return error messages for invalid format file", () => {
+      expect(mockValidateFileType(req.files)).toBe(false);
+    });
   });
 });

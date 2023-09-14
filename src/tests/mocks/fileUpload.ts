@@ -7,6 +7,17 @@ export interface IUploadedFile {
   size: number;
 }
 
+export interface MockReqFiles {
+  name: string;
+  data: object;
+  size: number;
+  encoding: string;
+  tempFilePath: string;
+  truncated: boolean;
+  mimetype: string;
+  md5: string;
+}
+
 export function checksFileSize(file: IUploadedFile) {
   if (file.size > 3) {
     throw new BadRequestError("File too big.");
