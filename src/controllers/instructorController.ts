@@ -4,53 +4,7 @@ import { BadRequestError, NotFoundError } from "@/helpers/api-errors";
 import mongoose from "mongoose";
 import "express-async-errors";
 import { validateFields } from "@/utils/validationUtils";
-
-/**
- * @swagger
- * /instructors:
- *  get:
- *    security:
- *      - cookieAuth: []
- *      - bearerAuth: []
- *    tags:
- *      - Instructor
- *    summary: Get all instructors
- *    description: Returns a list of all instructors
- *    responses:
- *      200:
- *        description: A list of instructors
- *        content:
- *          application/json:
- *            schema:
- *              type: array
- *              items:
- *                $ref: "#/components/schemas/InstructorResponse"
- *      401:
- *        description: Unauthorized
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                message:
- *                  type: string
- *                  default: Invalid token
- *      500:
- *        description: Internal Server Error
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                message:
- *                  type: string
- *                  default: Internal Server Error
- */
-
-export const getInstructors = async (_req: Request, res: Response) => {
-  const instructors: Instructor[] = await InstructorModel.find();
-  res.status(200).json(instructors);
-};
+import StudentModel from "@/models/student";
 
 /**
  * @swagger
@@ -105,6 +59,18 @@ export const createInstructor = async (req: Request, res: Response) => {
     throw new BadRequestError(validationErrors.msgErrors);
   }
 
+  const isRepeatedUser = await StudentModel.findOne({
+    $or: [
+      { user: req.body.user },
+      { phone: req.body.phone },
+      { email: req.body.email },
+    ],
+  });
+
+  if (isRepeatedUser) {
+    throw new BadRequestError("User already registered.");
+  }
+
   const newInstructor: Instructor = new InstructorModel(newInstructorData);
   await newInstructor.save();
 
@@ -126,7 +92,7 @@ export const createInstructor = async (req: Request, res: Response) => {
  *      - name: id
  *        in: path
  *        description: The id of the instructor
- *        requuired: true
+ *        required: true
  *    requestBody:
  *      required: true
  *      content:

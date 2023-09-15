@@ -10,11 +10,21 @@ import cookieParser from "cookie-parser";
 
 import { errorMiddleware } from "@/middlewares/error";
 import "express-async-errors";
+import fileUpload from "express-fileupload";
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser(config.jwt.secret));
+app.use(
+  fileUpload({
+    createParentPath: true,
+    safeFileNames: true,
+    preserveExtension: 4,
+    useTempFiles: true,
+    tempFileDir: "../temp",
+  }),
+);
 
 app.use("/api/v1", studentRoutes);
 app.use("/api/v1", instructorRoutes);

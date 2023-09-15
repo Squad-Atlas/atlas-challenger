@@ -28,11 +28,6 @@
  *                  type: string
  *                  format: password
  *                  example: "Password@123"
- *              areasOfInterest:
- *                  type: array
- *                  items:
- *                      type: string
- *                  example: ["Math", "Portuguese"]
  *
  *      StudentResponse:
  *          type: object
@@ -55,14 +50,12 @@
  *              password:
  *                  type: string
  *                  example: "$2b$10$tsLZtUdyWwNRp9FdxVPNbO1PB5m2gHXGzWWBIxGtLKJnK8SPRIjTC"
- *              areasOfInterest:
- *                  type: array
- *                  items:
- *                      type: string
- *                  example: ["Math", "Portuguese"]
  *              role:
  *                  type: string
- *                  default: "user"
+ *                  default: "student"
+ *              classroom:
+ *                  type: string
+ *                  default: []
  *              createdAt:
  *                  type: string
  *                  format: date-time
@@ -74,4 +67,19 @@
  *              __v:
  *                  type: integer
  *                  example: 0
+ *      ListStudents:
+ *          type: object
+ *          properties:
+ *              _id:
+ *                  type: string
+ *                  example: 64ecdbfeb0346a88964bcc55
+ *              name:
+ *                  type: string
+ *                  example: "Diego"
+ *              email:
+ *                  type: string
+ *                  example: "Diego@email.com"
+ *              phone:
+ *                  type: string
+ *                  example: "1140028922"
  */
