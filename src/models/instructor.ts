@@ -1,16 +1,16 @@
-import mongoose, { Document, Schema, Types } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcrypt";
+import { Classroom } from "./classroom";
 
 export interface Instructor extends Document {
   _id: string;
   name: string;
   email: string;
-  students: Types.ObjectId[];
   phone: string;
   user: string;
   password: string;
   role: string;
-  specialty: string[];
+  classroom: Classroom;
 
   comparePassword(): boolean;
 }
@@ -19,12 +19,14 @@ const InstructorSchema = new Schema<Instructor>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    students: [{ type: Schema.Types.ObjectId, ref: "Student", default: [] }],
-    phone: { type: String, required: true },
+    phone: { type: String, required: true, unique: true },
     user: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, default: "instructor" },
-    specialty: [{ type: String }],
+    classroom: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Classroom",
+    },
   },
   { timestamps: true },
 );

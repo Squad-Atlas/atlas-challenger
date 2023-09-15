@@ -26,11 +26,6 @@
  *              password:
  *                  type: string
  *                  example: "Password@123"
- *              specialty:
- *                  type: array
- *                  items:
- *                      type: string
- *                  example: ["Math", "Portuguese"]
  *
  *      InstructorResponse:
  *          type: object
@@ -44,9 +39,6 @@
  *              email:
  *                  type: string
  *                  example: "Diego@email.com"
- *              students:
- *                  type: array
- *                  default: []
  *              phone:
  *                  type: string
  *                  example: "1140028922"
@@ -56,14 +48,9 @@
  *              password:
  *                  type: string
  *                  example: "$2b$10$Dsub3fdFP81yFf.PRIVCOOh2LqjuZf0my82ijccMHSwnRm92wUvXe"
- *              specialty:
- *                  type: array
- *                  items:
- *                      type: string
- *                  example: ["Math", "Portuguese"]
  *              role:
  *                  type: string
- *                  default: "admin"
+ *                  default: "instructor"
  *              createdAt:
  *                  type: string
  *                  format: date-time
@@ -75,4 +62,30 @@
  *              __v:
  *                  type: integer
  *                  example: 0
+ *
+ *      InstructorClass:
+ *          type: object
+ *          required:
+ *              - subject
+ *              - schedule
+ *              - linkClassroom
+ *          properties:
+ *              subject:
+ *                  type: string
+ *                  example: "Math"
+ *              schedule:
+ *                  type: object
+ *                  properties:
+ *                      day:
+ *                          type: string
+ *                          example: "Monday"
+ *                      startTime:
+ *                          type: string
+ *                          example: "09:30:00"
+ *                      endTime:
+ *                          type: string
+ *                          example: "10:20:00"
+ *              linkClassroom:
+ *                  type: string
+ *                  example: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
  */
