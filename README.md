@@ -3,11 +3,10 @@
   
 | Nome     |      Email    |
 |----------|:-------------:|
-| Adriano Dias                   |   adriano.silva.pb@compasso.com.br      |
-| Ana Carolina Duarte Cavalcante |   ana.cavalcante.pb@compasso.com.br     | Migrou para outra Squad
-| Carlos Daniel de Brito Costa   |   carlos.costa.pb@compasso.com.br       |
+| Adriano Dias Alves da Silva    |   adriano.silva.pb@compasso.com.br      |
 | Gustavo Reis Souza Lima        |   gustavo.lima.pb@compasso.com.br       |
 | Leticia Machado Lopes          |   leticia.lopes.pb@compasso.com.br      |
+| Lucas Scommegna                |   lucas.scommegna.pb@compasso.com.br    |
 | Vinicius Augusto Sakamoto      |   vinicius.sakamoto.pb@compasso.com.br  |
 
   
@@ -36,6 +35,7 @@ This api serves to a platform which is focused on mentorship through synchronous
 4. Mongoose (v7.4.3)
 5. @Types/MongoDB (v4.0.7) 
 6. Imsomnia
+7. Jest (v29.6.2)
 
 ## Pre-requisites
 
@@ -83,7 +83,15 @@ Now, open the .env file with a text editor of your choice and provide the requir
    PORT = Add your port
    JWT_SECRET = Add your secret
 
+   SMTP_HOST = Add your host
+   SMTP_PORT = Add your port 
+   SMTP_USERNAME = Add your username
+   SMTP_PASSWORD = Add your password
+
 Replace `MONGO_URL`, `PORT`, `JWT_SECRET` with your actual credentials and database connection URL.
+Replace the `SMTP` environment variables so that they can use the email sending service that is used in one of the project routes 
+
+One of the services to obtain SMTP credentials to test the application is [Mailtrap](https://mailtrap.io)
 
 Once you've set up the environment variables in the `.env` file, you can proceed with running the project:
 
@@ -95,7 +103,14 @@ Once you've set up the environment variables in the `.env` file, you can proceed
    npm run build
    npm run start
 
-- This command will start server, and you should see output indicating that the server is running on a specific port. 
+- This command will start server, and you should see output indicating that the server is running on a specific port.
+
+### Testing the API with Jest
+
+- To carry out project testing using the developed Jest, follow the following instructions using commands in the terminal
+
+   ```bash
+   npm run test
 
 ## Testing the API with Insomnia
 
@@ -107,7 +122,7 @@ Once you've set up the environment variables in the `.env` file, you can proceed
    - Open Insomnia.
    - Click on the "Application" button in the top-left corner.
    - Choose the "Preferences" tab and select the "Data" column.
-   - Click the "Import to the Insomnia Project" button and import the Insomnia_2023-08-30.json.json file
+   - Click the "Import to the Insomnia Project" button and import the Insomnia_2023-09-15.json file
 
 4. Before running the API requests, ensure that the development server is up and running locally. If not, follow the "How to Run Locally" and "Setting Up Environment Variables" sections in this README to start the server.
 
@@ -122,3 +137,8 @@ Once you've set up the environment variables in the `.env` file, you can proceed
 The API will have the following features in Swagger documentation:
 
 To access the API documentation using Swagger, go to the route: http://localhost:3000/api-docs
+
+## Flowchart
+
+[Click here to see the project flowchart through miro](https://miro.com/app/embed/uXjVMsq8sso=/?pres=1&frameId=3458764564111600603&embedId=239356125541)
+
