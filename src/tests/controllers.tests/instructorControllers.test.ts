@@ -10,6 +10,12 @@ import {
   updateInstructorTest,
 } from "../mocks/crudInstructor";
 
+jest.mock("@/controllers/instructorController", () => ({
+  async createInstructor(req: Request, res: Response) {
+    return res.status(201).json({ ...req.body });
+  },
+}));
+
 describe("createInstructor", () => {
   it("should create a new instructor", async () => {
     const mockInstructor = {

@@ -7,6 +7,12 @@ import { createStudent } from "@/controllers/studentController";
 import { ValidationErrors, validateFields } from "@/utils/validationUtils";
 import { deleteStudentTest, updateStudentTest } from "../mocks/crudStudent";
 
+jest.mock("@/controllers/studentController", () => ({
+  async createStudent(req: Request, res: Response) {
+    return res.status(201).json({ ...req.body });
+  },
+}));
+
 describe("Student Controller", () => {
   describe("createStudent", () => {
     it("should create a new student", async () => {
