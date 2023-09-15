@@ -6,6 +6,9 @@ import { Request, Response } from "express";
  * @swagger
  * /instructors/getClassroom/{id}:
  *  get:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Instructor
  *    summary: Return of information from the teacher's class
@@ -47,6 +50,9 @@ export const updateClassroom = async (req: Request, res: Response) => {
  * @swagger
  * /instructors/deleteClassroom/{id}:
  *  delete:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Instructor
  *    summary: Delete a teacher's class

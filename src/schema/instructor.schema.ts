@@ -39,9 +39,6 @@
  *              email:
  *                  type: string
  *                  example: "Diego@email.com"
- *              students:
- *                  type: array
- *                  default: []
  *              phone:
  *                  type: string
  *                  example: "1140028922"
@@ -51,14 +48,9 @@
  *              password:
  *                  type: string
  *                  example: "$2b$10$Dsub3fdFP81yFf.PRIVCOOh2LqjuZf0my82ijccMHSwnRm92wUvXe"
- *              specialty:
- *                  type: array
- *                  items:
- *                      type: string
- *                  example: ["Math", "Portuguese"]
  *              role:
  *                  type: string
- *                  default: "admin"
+ *                  default: "instructor"
  *              createdAt:
  *                  type: string
  *                  format: date-time

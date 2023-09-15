@@ -50,14 +50,12 @@
  *              password:
  *                  type: string
  *                  example: "$2b$10$tsLZtUdyWwNRp9FdxVPNbO1PB5m2gHXGzWWBIxGtLKJnK8SPRIjTC"
- *              areasOfInterest:
- *                  type: array
- *                  items:
- *                      type: string
- *                  example: ["Math", "Portuguese"]
  *              role:
  *                  type: string
- *                  default: "user"
+ *                  default: "student"
+ *              classroom:
+ *                  type: string
+ *                  default: []
  *              createdAt:
  *                  type: string
  *                  format: date-time

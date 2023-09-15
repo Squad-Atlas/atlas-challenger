@@ -6,6 +6,9 @@ import { Request, Response } from "express";
  * @swagger
  * /students/listClassroom/{id}:
  *  get:
+ *    security:
+ *      - cookieAuth: []
+ *      - bearerAuth: []
  *    tags:
  *      - Student
  *    summary: Return of classes for which the student is registered
