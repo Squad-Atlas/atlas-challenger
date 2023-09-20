@@ -91,7 +91,9 @@ Now, open the .env file with a text editor of your choice and provide the requir
 Replace `MONGO_URL`, `PORT`, `JWT_SECRET` with your actual credentials and database connection URL.
 Replace the `SMTP` environment variables so that they can use the email sending service that is used in one of the project routes 
 
-One of the services to obtain SMTP credentials to test the application is [Mailtrap](https://mailtrap.io)
+One of the services to obtain SMTP credentials to test the application is [Mailtrap](https://mailtrap.io).
+After registering, go to email testing, click on my inbox and then show credentials. 
+You will only need the Host, Port, Username and Password.
 
 Once you've set up the environment variables in the `.env` file, you can proceed with running the project:
 
