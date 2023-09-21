@@ -24,6 +24,13 @@ import path from "path";
  *      - Student
  *    summary: List classes
  *    description: Returns a list of registered classes
+ *    parameters:
+ *      - name: filter
+ *        in: query
+ *        required: false
+ *        schema:
+ *          type: string
+ *        description: Filter to search subject name or class day
  *    responses:
  *      200:
  *        description: List of classes documents
@@ -47,9 +54,24 @@ import path from "path";
  */
 
 export const listSubjects = async (req: Request, res: Response) => {
-  const listSubjects: Classroom[] = await ClassroomModel.find()
-    .populate({ path: "instructor", select: "name" })
-    .select("subject schedule");
+  const filter = req.query.filter;
+
+  const queryFilter = filter
+    ? {
+        $or: [
+          { subject: { $regex: filter, $options: "i" } },
+          { "schedule.day": { $regex: filter, $options: "i" } },
+        ],
+      }
+    : {};
+
+  const listSubjects: Classroom[] = await ClassroomModel.find(queryFilter)
+    .select("subject schedule instructor")
+    .populate({
+      path: "instructor",
+      select: "name",
+    });
+
   return res.status(200).json(listSubjects);
 };
 
