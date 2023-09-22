@@ -108,13 +108,52 @@ Once you've set up the environment variables in the `.env` file, you can proceed
 - This command will start server, and you should see output indicating that the server is running on a specific port.
 
 ### Testing the API with Jest
+  Test Documentation with Coverage
+This documentation describes the unit tests implemented in the project, provides instructions on how to run them, and includes information on test coverage.
 
-- To carry out project testing using the developed Jest, follow the following instructions using commands in the terminal
+Unit Tests
+Unit tests are a fundamental part of the development process and help ensure code quality and stability.
+Test Structure
+Unit tests are organized into various files, each testing a specific part of the code. Below, you will find brief descriptions of each test file and its functionalities.
 
-   ```bash
-   npm run test
+Make sure you have all dependencies installed!
 
-## Testing the API with Insomnia
+`error.test.ts`
+
+- **Description:** Tests error handling behavior throughout the application.
+- **Objective:** Ensure that the application responds appropriately to unexpected situations.
+- **Instructions for Execution:**
+   Run the tests: `npm run test:error`
+
+`studentFuncionalities.test.ts`
+
+- **Description:** Tests specific functionalities related to students.
+- **Objective:** Verify the behavior of features related to students.
+- **Instructions for Execution:**
+   Run the tests: `npm run test:student`
+
+`instructorFuncionalities.test.ts`
+
+- **Description:** Tests specific functionalities related to instructors.
+- **Objective:** Verify the behavior of features related to instructors.
+- **Instructions for Execution:**
+   Run the tests: `npm run test:instructor`
+
+`studentControllers.test.ts`
+
+- **Description:** Tests controllers related to students.
+- **Objective:** Ensure that operations related to students are executed correctly.
+- **Instructions for Execution:**
+   Run the tests: `npm run test:student-controllers`
+
+`instructorControllers.test.ts`
+
+- **Description:** Tests controllers related to instructors.
+- **Objective:** Ensure that operations related to instructors are executed correctly.
+- **Instructions for Execution:**
+   Run the tests: `npm run test:instructor-controllers`
+  
+### Testing the API with Insomnia
 
 1. Make sure you have [Insomnia](https://insomnia.rest/download) installed on your machine.
 
