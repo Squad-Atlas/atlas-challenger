@@ -11,21 +11,31 @@ import {
 describe("validateStudentEnrollment", () => {
   it("should return classes for the student with the corresponding studentId", async () => {
     const studentId = "5f7f91c74d3e1746f093da1c";
-    const classes = await listSubjectMock(studentId);
+    const classes = await listSubjectMock(studentId, "");
     expect(classes).toEqual(["Math", "Physics", "Chemistry"]);
   });
 
   it("should return different classes for another student with the corresponding studentId", async () => {
     const studentId = "5f7f91c74d3e1746f093da2b";
-    const classes = await listSubjectMock(studentId);
+    const classes = await listSubjectMock(studentId, "");
     expect(classes).toEqual(["History", "Geography", "English"]);
   });
 
   it("should return an empty array for an unregistered student", async () => {
     const studentId = "unregisteredStudent";
+    const classes = await listSubjectMock(studentId, "");
+    expect(classes).toEqual([]);
+  });
 
-    const classes = await listSubjectMock(studentId);
+  it("should return filtered subject when filter is given", async () => {
+    const studentId = "5f7f91c74d3e1746f093da1c";
+    const classes = await listSubjectMock(studentId, "ath");
+    expect(classes).toEqual(["Math"]);
+  });
 
+  it("should return an empty array for a not listed subject", async () => {
+    const studentId = "5f7f91c74d3e1746f093da2b";
+    const classes = await listSubjectMock(studentId, "Prog");
     expect(classes).toEqual([]);
   });
 });

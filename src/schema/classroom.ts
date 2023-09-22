@@ -10,7 +10,7 @@
  *                  example: "64fb20d1e70f4dbd6bac3db0"
  *              subject:
  *                  type: string
- *                  exaple: "Math"
+ *                  example: "Math"
  *              instructor:
  *                  type: object
  *                  properties:

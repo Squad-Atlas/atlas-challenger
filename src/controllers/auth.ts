@@ -8,6 +8,7 @@ import {
   convertPayload,
   createJWT,
 } from "@/utils/jwt";
+import AdminModel, { IAdmin } from "@/models/admin";
 
 /**
  * @swagger
@@ -120,4 +121,27 @@ export const logout = async (req: Request, res: Response) => {
   }
 
   res.status(500).json({ message: "Internal Server Error" });
+};
+
+export const loginAdmin = async (req: Request, res: Response) => {
+  const { user, password } = req.body;
+
+  if (!user || !password) {
+    throw new BadRequestError("Please provide email and password");
+  }
+
+  const userLogin: IAdmin | null = await AdminModel.findOne({ user });
+
+  if (!userLogin) {
+    throw new BadRequestError("Invalid Credentials");
+  }
+
+  if (userLogin.password !== password)
+    throw new BadRequestError("Invalid Credentials");
+
+  const userRequest = convertPayload(userLogin);
+  const token = createJWT(userRequest);
+
+  attachCookiesToResponse({ res, user: userRequest });
+  res.status(200).json({ user: { user: userLogin.user }, token });
 };

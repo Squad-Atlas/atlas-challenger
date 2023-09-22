@@ -1,8 +1,8 @@
 import express from "express";
-import { Request, Response } from "express";
 import { router as studentRoutes } from "@/routes/studentRoutes";
 import { router as instructorRoutes } from "@/routes/instructorRoutes";
 import { router as authRoutes } from "@/routes/authRoutes";
+import { router as adminRoutes } from "@/routes/adminRoutes";
 
 import { config } from "@/config/config";
 
@@ -29,10 +29,7 @@ app.use(
 app.use("/api/v1", studentRoutes);
 app.use("/api/v1", instructorRoutes);
 app.use("/api/v1", authRoutes);
-
-app.get("/", (_req: Request, res: Response) => {
-  res.send("Hello World!");
-});
+app.use("/api/v1", adminRoutes);
 
 app.use(errorMiddleware);
 
